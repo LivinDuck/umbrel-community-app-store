@@ -1,0 +1,25 @@
+version: "3.7"
+
+services:
+  app_proxy:
+    environment:
+      APP_HOST: livinduck-rmfakecloud_server_1
+      APP_PORT: 3000
+      # Tablet clients cannot supply Umbrel session cookies. The upstream
+      # protocol handles pairing, bearer tokens and signed storage URLs.
+      # Browser routes, especially /ui/api/login (first account), stay protected.
+      PROXY_AUTH_WHITELIST: "/health,/discovery/*,/token/*,/service/*,/settings/*,/analytics/*,/v1/reports,/v2/reports,/report/v1,/v2/events,/screenshare/*,/notifications/*,/passcode/*,/document-storage/*,/api/*,/share/*,/convert/*,/doc/*,/integrations/*,/sync/*,/storage/*,/blobstorage"
+
+  server:
+    image: ddvk/rmfakecloud:0.0.31@sha256:2f5c45cbf0c53a5fb7bc38c97dd9d26d3701c5a5e04d0e9206311ba258c32fac
+    user: "1000:1000"
+    restart: on-failure
+    stop_grace_period: 1m
+    environment:
+      PORT: "3000"
+      DATADIR: /data
+      JWT_SECRET_KEY: ${APP_SEED}
+      # Leave STORAGE_URL unset: tablet firmware >=3.15 requires the default
+      # HTTPS local.appspot.com address handled by rmfakecloud-proxy on-device.
+    volumes:
+      - ${APP_DATA_DIR}/data/cloud:/data

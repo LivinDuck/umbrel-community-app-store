@@ -1,0 +1,39 @@
+name: Validate apps
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  lint:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: getumbrel/umbrel-apps
+          ref: d06a1f6ef643443a64706ecab96b5d824276d59f
+          path: .validation/umbrel-apps
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --prefix .validation/umbrel-apps --ignore-scripts --no-audit --no-fund
+      - name: Validate packages and public multi-architecture images
+        run: node .validation/umbrel-apps/.tools/lint-apps.mjs --root "$GITHUB_WORKSPACE" --all --check-images
+      - run: git diff --check
+  rmfakecloud:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install PyYAML==6.0.2
+      - name: Check onboarding, pairing and persistence in a disposable container
+        run: python tests/smoke_rmfakecloud.py

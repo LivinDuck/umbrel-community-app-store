@@ -1,0 +1,40 @@
+manifestVersion: 1
+id: livinduck-rmfakecloud
+category: files
+name: rmfakecloud
+version: "0.0.31"
+tagline: Host your own cloud for your reMarkable tablet
+description: >-
+  Open the app after installation and choose an email and password. The first
+  login creates your administrator account. The browser interface is protected
+  by Umbrel login; tablet sync endpoints use rmfakecloud's own authentication.
+
+
+  Synchronize and store reMarkable documents on your own server. Accounts and
+  documents persist in this app's data directory.
+
+
+  Tablet setup is required separately: install and configure the upstream
+  rmfakecloud-proxy on your reMarkable, pointing it at this app's address on port
+  39400. Then generate a pairing code in the web interface. Back up your tablet
+  before switching clouds. See the setup guide linked below.
+
+
+  This initial package targets local-network document sync. Optional SMTP,
+  handwriting recognition credentials, and legacy MQTT screen sharing are not
+  configured. Newer REST screen sharing is provided by upstream but unverified.
+  Container checks do not replace testing through Umbrel with a real tablet.
+releaseNotes: ""
+developer: ddvk and contributors
+website: https://ddvk.github.io/rmfakecloud/
+dependencies: []
+repo: https://github.com/ddvk/rmfakecloud
+support: https://github.com/LivinDuck/umbrel-community-app-store/issues
+port: 39400
+gallery: []
+path: ""
+defaultUsername: ""
+defaultPassword: ""
+submitter: LivinDuck
+submission: https://github.com/LivinDuck/umbrel-community-app-store
+icon: https://raw.githubusercontent.com/LivinDuck/umbrel-community-app-store/main/livinduck-rmfakecloud/icon.svg
