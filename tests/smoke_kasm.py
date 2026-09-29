@@ -47,6 +47,8 @@ def wait_ready():
         except (OSError, RuntimeError):
             pass
         time.sleep(2)
+    print(docker('logs', '--tail', '60', gateway, check=False), flush=True)
+    print(docker('logs', '--tail', '60', server, check=False), flush=True)
     raise AssertionError('Wizard or nested Docker failed to start')
 
 
@@ -116,6 +118,8 @@ with tempfile.TemporaryDirectory(prefix=prefix) as temporary:
         start(data)
         # Refresh nginx's upstream DNS after server container recreation.
         docker('restart', gateway)
+        # Docker may allocate a new ephemeral host port on restart.
+        base = 'http://' + docker('port', gateway, '8080/tcp')
         wait_ready()
         check_wizard()
         assert cert == docker('exec', server, 'sha256sum', '/opt/kasm/certs/kasm_wizard.crt')
