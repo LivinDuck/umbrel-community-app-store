@@ -1,40 +1,40 @@
-manifestVersion: 1
+manifestVersion: 2
 id: livinduck-kasm
 category: networking
 name: Kasm Workspaces
-version: "1.19.0-1"
+version: "1.19.0-2"
 tagline: Stream desktops and applications to your browser
 description: >-
-  Open the app and select Setup & updates to complete the Kasm installation
-  wizard. Review the license, choose administrator and user passwords, and
-  select your workspaces. Initial downloads can take several minutes and many
-  gigabytes. Setup is protected by your Umbrel login.
+  Run Linux desktops and applications in your browser. Requires umbrelOS 2.0
+  or later for HTTPS. Open the app directly from Umbrel: on first use it opens
+  the setup wizard, and afterward it opens Kasm itself on the same address.
 
 
-  After setup, select Open Kasm to connect over HTTPS on port 39402. Accept
-  Kasm's self-signed certificate on your trusted network and sign in as
-  admin@kasm.local using your chosen password. Kasm uses its own login on this
-  port. This package targets local-network access; Umbrel remote access does
-  not automatically forward Kasm's HTTPS port.
+  Review the Kasm license, choose administrator and user passwords, and select
+  your workspaces. Downloads and initial startup can take several minutes and
+  many gigabytes. Keep the installer open and avoid starting another installation
+  while it is running. Once setup finishes, Kasm opens automatically.
 
 
-  Kasm streams on-demand Linux desktops and applications to your browser.
-  This package uses LinuxServer.io's container and requires privileged mode
-  for its nested Docker engine. Allow at least 2 CPU cores, 4 GB RAM and
-  50 GB free storage, with additional resources for workspaces. Both AMD64
-  and ARM64 are supported; available workspace images vary by architecture.
+  Sign in as admin@kasm.local using your chosen password. Both setup and Kasm
+  are protected by Umbrel login. The setup and upgrade wizard remains available
+  at /setup/ on the same app address. HTTPS uses Umbrel's certificate; follow
+  Umbrel's HTTPS setup instructions if your browser does not yet trust it.
 
 
-  Kasm installation data and downloaded images are persisted. Workspace
-  sessions are disposable by default; configure persistent profiles to keep
-  files between sessions. Keep the setup wizard enabled for browser-based
-  upgrades. Updating the Umbrel package alone does not upgrade an existing
-  Kasm installation. Kasm's own license terms apply.
+  This package uses LinuxServer.io's container with privileged mode for its
+  nested Docker engine. Allow at least 2 CPU cores, 4 GB RAM and 50 GB free
+  storage, plus resources for workspaces. AMD64 and ARM64 are supported.
+  Sessions are disposable unless you configure persistent profiles.
+  Updating the package alone does not upgrade an existing Kasm installation.
 releaseNotes: >-
-  Setup now returns to a page that checks Kasm's actual readiness, instead of
-  reloading the installer menu. The page waits for Kasm's HTTPS service to
-  become healthy and explains what to do while startup is still in progress.
-  The underlying Kasm version remains 1.19.0.
+  Requires umbrelOS 2.0. Kasm now opens directly on HTTPS port 39401, using
+  Umbrel's HTTPS support and login protection. The extra launcher and exposed
+  port 39402 are removed. First use opens /setup/ on the same address; setup
+  completion opens Kasm automatically. Existing default-zone configurations
+  using port 39402 are migrated to use the browser's port. Accounts and
+  workspace data are preserved. Replace old port-39402 bookmarks.
+
 developer: Kasm Technologies
 website: https://kasm.com/
 dependencies: []
@@ -42,7 +42,8 @@ repo: https://github.com/linuxserver/docker-kasm
 support: https://github.com/LivinDuck/umbrel-community-app-store/issues
 port: 39401
 gallery: []
-path: "/umbrel"
+path: ""
+requiresHttps: true
 defaultUsername: ""
 defaultPassword: ""
 submitter: LivinDuck

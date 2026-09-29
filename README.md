@@ -16,7 +16,7 @@ the app. Install it when you are ready.
 | App | Version | Setup |
 | --- | --- | --- |
 | rmfakecloud | 0.0.31 | [Setup and limitations](livinduck-rmfakecloud/README.md) |
-| Kasm Workspaces | 1.19.0-1 | [Setup and limitations](livinduck-kasm/README.md) |
+| Kasm Workspaces | 1.19.0-2 | [Setup and limitations](livinduck-kasm/README.md) |
 
 ## Packaging workflow
 
@@ -34,8 +34,8 @@ No automatic installation or upstream version bumping is configured.
 The `Validate apps` workflow uses a pinned revision of Umbrel's package linter
 and runs disposable rmfakecloud and Kasm container tests on GitHub-hosted runners.
 It never connects to the NAS. Actual Umbrel installation and physical tablet
-sync remain untested until explicitly performed. Kasm checks cover the wizard,
-proxy and storage; full installation and desktop sessions remain untested.
+sync remain untested until explicitly performed. Kasm checks exercise installation, login and storage; desktop streaming remains
+untested.
 
 Keep personal addresses, passwords, API keys, rendered configuration and runtime
 data out of this public repository. Packaging files and the original generic

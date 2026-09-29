@@ -1,106 +1,99 @@
-# Kasm Workspaces 1.19.0 (package 1.19.0-1)
+# Kasm Workspaces 1.19.0 (package 1.19.0-2)
 
-This package uses LinuxServer.io's `1.19.0-ls150` image, pinned by its public
-AMD64/ARM64 index digest. It runs a nested Docker engine in privileged mode.
-Privileged mode grants broad host capabilities; install only if you trust Kasm
-and its container image. It does not mount Umbrel's Docker socket. The nginx
-sidecar bridges the HTTPS setup wizard to Umbrel's authenticated app proxy.
+Requires **umbrelOS 2.0 or later**. Open Kasm from the Umbrel dashboard: it uses
+**HTTPS port 39401** for both initial setup and everyday use. There is no launcher
+page and no separate host-published Kasm port. Umbrel terminates HTTPS and
+protects all routes with Umbrel login; the internal gateway connects to Kasm
+over HTTPS. Follow Umbrel's HTTPS certificate setup instructions if your browser
+does not yet trust the device's certificate.
 
 ## First run
 
-1. Open **Kasm Workspaces** from Umbrel. The launch page is on port **39401**.
-2. Select **Setup & updates**, review the upstream EULA, and choose strong
-   passwords for `admin@kasm.local` and `user@kasm.local`.
-3. Select only the workspace images you need. Downloads need internet access
-   and may consume many gigabytes. Wait for the wizard to finish.
-4. When setup completes, it returns to the launch page. Wait for **Kasm is ready**,
-   then select **Open Kasm**. It uses your browser's
-   current hostname with **HTTPS port 39402**. Expect a self-signed certificate
-   warning on first access; proceed only for your own trusted server.
-5. Sign in using the administrator password you chose. Use `user@kasm.local`
+1. Open **Kasm Workspaces** from Umbrel. Before installation, it opens `/setup/`.
+2. Review the Kasm EULA and choose strong passwords for `admin@kasm.local` and
+   `user@kasm.local`. Select the workspace images you need.
+3. Wait for installation to finish. Downloads and startup can take several
+   minutes and many gigabytes. Keep the installer open; avoid concurrent installs.
+4. On completion, the wizard opens Kasm directly on the same address. If its
+   services are still starting, a temporary page retries automatically.
+5. Sign in as `admin@kasm.local` with your chosen password. Use `user@kasm.local`
    for ordinary workspace sessions.
 
-The minimum upstream baseline is 2 CPU cores, 4 GB RAM and 50 GB free disk;
-allow more for active sessions and images. ARM64 has a different workspace
-selection from AMD64. Host support for privileged nested Docker and its storage
-driver is required. Actual Umbrel hardware compatibility is not yet verified.
-GPU/gamepad passthrough is not configured.
+For subsequent visits the Umbrel icon opens Kasm directly. Keep the wizard
+enabled if you want browser-managed updates at `/setup/` on the same address.
 
-The wizard and launch page require Umbrel login, with no authentication
-whitelist. Port 3000 is not published to the host. Kasm's HTTPS port 39402 uses
-Kasm's own authentication and bypasses Umbrel login by design: the native HTTPS
-endpoint preserves secure cookies and the matching session port required by
-upstream. Use a trusted LAN. Tor or other Umbrel remote access does not
-implicitly expose port 39402; public reverse-proxy deployment needs separate
-TLS, routing and Kasm zone configuration. Other containers on Umbrel's shared
-Docker network can reach the wizard directly; this is not an isolation boundary
-against a compromised neighboring app.
+The upstream baseline is 2 CPU cores, 4 GB RAM and 50 GB free disk; allow more for
+active sessions and workspace images. AMD64 and ARM64 have different available
+workspaces. GPU and gamepad passthrough are not configured.
 
-## Startup status
+## Permissions and networking
 
-The launch page polls Kasm's actual HTTPS API health endpoint every five seconds
-until it is ready. A running setup wizard does not mean Kasm itself is ready.
-Initial startup can continue for several minutes after installation work.
-Keep an active installer open; do not start concurrent installation attempts.
-If the installer reports an error, retain its terminal output for diagnosis.
+LinuxServer.io's `1.19.0-ls150` image runs its own Docker engine and requires
+privileged mode. This grants broad host capabilities: install only if you trust
+Kasm and its container image. Umbrel's Docker socket is not mounted.
 
-This package revision changes the completion redirect and readiness display;
-it does not change the upstream image or automatically repair failed network
-plugins. An observed initial network-plugin error on the user's ARM64 host was
-followed by a healthy installation without any intervention from this package.
+Internal Kasm HTTPS remains on port 39402, with the wizard on port 3000. Neither
+is published to the host. The default Kasm zone's **Proxy Port** is set to **0**,
+which tells Kasm to use the browser's port for workspace connections, as required
+by its reverse-proxy documentation. The gateway supports WebSockets and streams
+uploads. It reads the installation directory read-only to distinguish a fresh
+install from a temporarily unavailable installation; those files are never
+served as web content.
 
-## Data and recovery
+Umbrel login protects both Kasm and setup, without route exemptions. Other
+containers on Umbrel's shared Docker network may still reach internal services;
+this is not isolation against a compromised neighboring app. This package targets
+Umbrel's local HTTPS access. External reverse proxies and companion API clients
+have not been validated.
 
-- `data/opt` holds the nested Docker images/volumes, Kasm database, installation,
+## Data, updates and recovery
+
+- `data/opt` holds the nested Docker images/volumes, database, installation,
   certificates and configuration.
-- `data/profiles` is available inside Kasm as `/profiles`. Sessions are disposable
-  by default. To preserve user files, configure each workspace's persistent
-  profile path, for example `/profiles/ubuntu/{username}`, following the
-  [upstream profile instructions](https://docs.kasm.com/docs/latest/guide/persistent_data/persistent_profiles).
-- Stop the entire Umbrel app before taking a consistent backup of **both**
-  directories. Preserve numeric ownership and permissions. Backups can be large
-  because the nested Docker state is included. Restore with the app stopped.
-- Avoid changing the backing filesystem or moving the nested Docker store
-  between incompatible architectures/storage drivers.
+- `data/profiles` is available to workspaces as `/profiles`. Sessions are
+  disposable by default. Configure persistent profiles such as
+  `/profiles/ubuntu/{username}` following the
+  [upstream instructions](https://docs.kasm.com/docs/latest/guide/persistent_data/persistent_profiles).
+- Stop the app before backing up both directories. Preserve numeric ownership
+  and permissions. Backups include nested Docker state and can be large.
+- Restore with the app stopped, on a compatible architecture and storage driver.
 
-## Updates
+Updating the package preserves existing Kasm accounts and data. An existing
+default zone using the old package's port 39402 is migrated once to Proxy Port 0.
+Other custom port values are preserved and may need adjustment by their owner.
+Old port-39402 bookmarks must be replaced with the URL opened by Umbrel.
 
-Updating the outer image does **not** upgrade an already installed Kasm system.
-Back up first, update the Umbrel package, then open **Setup & updates** and run
-the upstream upgrade. Update workspace image tags as directed by upstream.
-The inner installer downloads additional service/workspace images at setup;
-those upstream-managed images are not frozen by the outer image digest.
-An outer-image downgrade is not a database rollback; recover the matching
-backup if an upgrade must be undone.
+Updating the outer image alone does **not** upgrade an existing Kasm installation.
+Back up first, update the package, then open `/setup/` and perform the upstream
+upgrade. Update workspace image tags as directed by upstream. Inner service and
+workspace images are managed by the installer, not frozen by the outer digest.
+An image downgrade does not roll back the database; restore a matching backup.
 
-Keep the wizard enabled for browser-managed upgrades. If you choose its disable
-option, **Open Kasm** still works. To re-enable the wizard, an administrator must
-stop the app, remove only `data/opt/NO_WIZARD` from this app's installed data,
-then start it again. Do not delete the rest of `data/opt`.
+If you disable the wizard, Kasm still opens normally. To re-enable it, stop the
+app, remove only `data/opt/NO_WIZARD` from this app's installed data, and start it
+again. Keep installer error output if setup fails; an error can be different
+from slow startup.
 
 ## Licensing and sources
 
-Kasm Workspaces is subject to its own EULA, presented during setup. Its Community
-edition has usage/session restrictions; review the current
-[Kasm licensing terms](https://kasm.com/docs/latest/license.html).
-LinuxServer's container packaging is GPL-3.0; this store's original icon and
-integration files are MIT licensed. This is an independent community package.
+Kasm is subject to its own EULA and Community edition restrictions, presented
+during setup. Review [Kasm licensing](https://kasm.com/docs/latest/license.html).
+LinuxServer's container packaging is GPL-3.0. This store's original integration
+files and icon are MIT licensed; this is an independent community package.
 
 - [Container documentation](https://docs.linuxserver.io/images/docker-kasm/)
-- [Container source and releases](https://github.com/linuxserver/docker-kasm)
-- [Kasm system requirements](https://docs.kasm.com/docs/develop/explanations/system-requirements)
+- [Container source](https://github.com/linuxserver/docker-kasm)
+- [Reverse-proxy configuration](https://www.kasmweb.com/docs/latest/how_to/reverse_proxy.html)
 
-## Verification scope
+## Verification
 
-The store's pinned Umbrel linter checks both public multi-architecture image
-pins, manifest, ports and Compose wiring. CI runs disposable AMD64 and ARM64
-containers to verify the launch page, HTTPS wizard bridge, Socket.IO onboarding
-metadata, nested Docker startup, writable state, certificate and Docker-volume
-persistence after recreation, and launch-page access when the wizard is disabled.
+The pinned Umbrel linter checks metadata, wiring and public AMD64/ARM64 image
+pins. Disposable CI tests exercise installation through the real wizard,
+WebSocket transport, the direct app route, API health, accepted/rejected account
+logins, default-zone migration and persistence after container recreation.
+See the workflow for actual results for the published commit.
 
-These checks do not accept the EULA, create Kasm accounts, download desktop
-workspaces or prove a full Kasm installation. Umbrel app-proxy authentication,
-full installation/update automation and browser desktop streaming remain untested.
-Read-only inspection of the user's ARM64 Umbrel confirmed that the existing
-installation eventually served its login page and returned a healthy API response;
-no repair or restart was performed on that host. See the workflow for actual CI results.
+Umbrel's HTTPS listener was confirmed by read-only inspection on an ARM64
+umbrelOS 2.0 host. End-to-end Umbrel authentication, browser desktop streaming,
+external reverse proxies and a full historical-version upgrade remain untested.
+No test installs or modifies an app on the user's NAS.

@@ -1,0 +1,52 @@
+"""Configure Kasm for Umbrel's HTTPS reverse proxy before starting upstream init."""
+from pathlib import Path
+import os
+import subprocess
+import sys
+import time
+
+MARKER = Path('/opt/.umbrel-browser-port-v1')
+SQL = "UPDATE zones SET proxy_port=0 WHERE zone_name='default' AND proxy_port=39402; SELECT proxy_port FROM zones WHERE zone_name='default';"
+
+
+def migrate():
+    # Existing installs keep their internal listener and credentials. Change only
+    # the old package's default advertised browser port, once, to browser-origin.
+    for _ in range(180):
+        try:
+            result = subprocess.run(['docker', 'exec', 'kasm_db', 'psql', '-U', 'kasmapp',
+                '-d', 'kasm', '-v', 'ON_ERROR_STOP=1', '-Atc', SQL],
+                capture_output=True, text=True, timeout=15)
+            if result.returncode == 0 and result.stdout.strip():
+                MARKER.touch()
+                print('Umbrel browser-port migration complete.', flush=True)
+                return
+        except subprocess.TimeoutExpired:
+            pass
+        time.sleep(5)
+    print('Umbrel browser-port migration did not finish. Set the default zone Proxy Port to 0 in Kasm before launching a workspace.', flush=True)
+    sys.exit(1)
+
+
+if len(sys.argv) > 1 and sys.argv[1] == 'migrate':
+    migrate()
+    sys.exit(0)
+
+# The installer normally seeds the browser port with the INTERNAL listener port.
+# Kasm documents 0 for reverse proxies: use the port in the browser's URL.
+installer = Path('/kasm_release/install.sh')
+source = installer.read_text()
+lines = source.splitlines(keepends=True)
+matching = [i for i, line in enumerate(lines) if '.proxy_port = ' in line]
+if len(matching) != 1:
+    raise RuntimeError('Upstream proxy-port configuration changed; refusing an unverified patch')
+i = matching[0]
+if ".proxy_port = 0' " not in lines[i]:
+    if "'' " not in lines[i]:
+        raise RuntimeError('Unexpected upstream proxy-port assignment')
+    lines[i] = lines[i].split('.proxy_port = ', 1)[0] + ".proxy_port = 0' " + lines[i].split("'' ", 1)[1]
+    installer.write_text(''.join(lines))
+
+if Path('/opt/kasm/current/docker/docker-compose.yaml').exists() and not MARKER.exists():
+    subprocess.Popen([sys.executable, __file__, 'migrate'])
+os.execv('/init', ['/init'])
