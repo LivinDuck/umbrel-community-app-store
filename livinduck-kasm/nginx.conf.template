@@ -29,6 +29,7 @@ server {
         proxy_set_header Upgrade ${APP_LIVINDUCK_KASM_DOLLAR}http_upgrade;
         proxy_set_header Connection ${APP_LIVINDUCK_KASM_DOLLAR}connection_upgrade;
         sub_filter_types application/javascript text/javascript;
+        sub_filter_once off;
         sub_filter 'location.reload(true);' 'location.assign("/");';
         sub_filter 'info.port' 'window.location.port';
         sub_filter "'Your installation is available on port ' + port" "'Kasm will open automatically on this address'";
