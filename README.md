@@ -1,7 +1,6 @@
-# LivinDuck Umbrel App Store
+# Umbrel App Store 
 
-A personal community app store for umbrelOS. Independent of Umbrel and the
-upstream projects; this is not the official Umbrel catalog.
+This is a personal project with a couple of docker apps not in the umbrelOS store that I needed. THE MAJORITY OF THIS IS AI GENERATED AND UNMAINTAINED!! Don't use unless you know what you are doing.
 
 ## Add the store
 
