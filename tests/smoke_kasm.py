@@ -167,6 +167,8 @@ with tempfile.TemporaryDirectory(prefix=prefix) as temporary:
         wizard_js = request('/setup/public/js/index.js')
         assert 'location.assign("/");' in wizard_js
         assert 'location.reload(true);' not in wizard_js
+        assert 'info.port' not in wizard_js
+        assert 'Kasm will open automatically on this address' in wizard_js
         try:
             request('/umbrel-health')
         except urllib.error.HTTPError as error:
