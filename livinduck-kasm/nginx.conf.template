@@ -5,6 +5,8 @@ map ${APP_LIVINDUCK_KASM_DOLLAR}http_upgrade ${APP_LIVINDUCK_KASM_DOLLAR}connect
 server {
     listen 8080;
     server_name _;
+    # Keep redirects relative to Umbrel's external HTTPS origin.
+    absolute_redirect off;
     proxy_ssl_verify off;
     proxy_http_version 1.1;
     proxy_set_header Host ${APP_LIVINDUCK_KASM_DOLLAR}http_host;
