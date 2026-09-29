@@ -1,0 +1,46 @@
+manifestVersion: 1
+id: livinduck-kasm
+category: networking
+name: Kasm Workspaces
+version: "1.19.0"
+tagline: Stream desktops and applications to your browser
+description: >-
+  Open the app and select Setup & updates to complete the Kasm installation
+  wizard. Review the license, choose administrator and user passwords, and
+  select your workspaces. Initial downloads can take several minutes and many
+  gigabytes. Setup is protected by your Umbrel login.
+
+
+  After setup, select Open Kasm to connect over HTTPS on port 39402. Accept
+  Kasm's self-signed certificate on your trusted network and sign in as
+  admin@kasm.local using your chosen password. Kasm uses its own login on this
+  port. This package targets local-network access; Umbrel remote access does
+  not automatically forward Kasm's HTTPS port.
+
+
+  Kasm streams on-demand Linux desktops and applications to your browser.
+  This package uses LinuxServer.io's container and requires privileged mode
+  for its nested Docker engine. Allow at least 2 CPU cores, 4 GB RAM and
+  50 GB free storage, with additional resources for workspaces. Both AMD64
+  and ARM64 are supported; available workspace images vary by architecture.
+
+
+  Kasm installation data and downloaded images are persisted. Workspace
+  sessions are disposable by default; configure persistent profiles to keep
+  files between sessions. Keep the setup wizard enabled for browser-based
+  upgrades. Updating the Umbrel package alone does not upgrade an existing
+  Kasm installation. Kasm's own license terms apply.
+releaseNotes: ""
+developer: Kasm Technologies
+website: https://kasm.com/
+dependencies: []
+repo: https://github.com/linuxserver/docker-kasm
+support: https://github.com/LivinDuck/umbrel-community-app-store/issues
+port: 39401
+gallery: []
+path: "/umbrel"
+defaultUsername: ""
+defaultPassword: ""
+submitter: LivinDuck
+submission: https://github.com/LivinDuck/umbrel-community-app-store
+icon: https://raw.githubusercontent.com/LivinDuck/umbrel-community-app-store/main/livinduck-kasm/icon.svg

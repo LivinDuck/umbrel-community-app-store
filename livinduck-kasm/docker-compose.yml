@@ -1,0 +1,32 @@
+version: "3.7"
+
+services:
+  app_proxy:
+    environment:
+      APP_HOST: livinduck-kasm_gateway_1
+      APP_PORT: 8080
+
+  gateway:
+    image: nginx:1.30.5-alpine@sha256:0985e772fb9f729e6fa0980da05fca5d9c468e870eed43071545afa9d2e27d94
+    restart: on-failure
+    depends_on:
+      - server
+    volumes:
+      - ${APP_DATA_DIR}/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ${APP_DATA_DIR}/index.html:/usr/share/nginx/html/index.html:ro
+
+  server:
+    image: ghcr.io/linuxserver/kasm:1.19.0-ls150@sha256:22288312b295cfffc15eea2643bd1aee52bb750f1e754ab4d722e7a5ca5a3d7b
+    # Required by upstream's nested Docker engine, not Umbrel's Docker daemon.
+    privileged: true
+    restart: on-failure
+    stop_grace_period: 90s
+    environment:
+      KASM_PORT: "39402"
+    volumes:
+      - ${APP_DATA_DIR}/data/opt:/opt
+      - ${APP_DATA_DIR}/data/profiles:/profiles
+    ports:
+      # Kasm needs HTTPS and matching internal/external ports for sessions.
+      # Its own account authentication protects this endpoint.
+      - "39402:39402"

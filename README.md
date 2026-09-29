@@ -11,12 +11,13 @@ In Umbrel, open **App Store → menu → Community App Stores**, then add:
 https://github.com/LivinDuck/umbrel-community-app-store
 ```
 
-Find **rmfakecloud** in the LivinDuck store. Adding the store does not install
+Find **rmfakecloud** or **Kasm Workspaces** in the LivinDuck store. Adding the store does not install
 the app. Install it when you are ready.
 
 | App | Version | Setup |
 | --- | --- | --- |
 | rmfakecloud | 0.0.31 | [Setup and limitations](livinduck-rmfakecloud/README.md) |
+| Kasm Workspaces | 1.19.0 | [Setup and limitations](livinduck-kasm/README.md) |
 
 ## Packaging workflow
 
@@ -32,9 +33,10 @@ Updates repeat the same review, including data migrations and backup/recovery.
 No automatic installation or upstream version bumping is configured.
 
 The `Validate apps` workflow uses a pinned revision of Umbrel's package linter
-and runs disposable rmfakecloud container tests on GitHub-hosted runners.
+and runs disposable rmfakecloud and Kasm container tests on GitHub-hosted runners.
 It never connects to the NAS. Actual Umbrel installation and physical tablet
-sync remain untested until explicitly performed.
+sync remain untested until explicitly performed. Kasm checks cover the wizard,
+proxy and storage; full installation and desktop sessions remain untested.
 
 Keep personal addresses, passwords, API keys, rendered configuration and runtime
 data out of this public repository. Packaging files and the original generic

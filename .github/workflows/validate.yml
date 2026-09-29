@@ -37,3 +37,18 @@ jobs:
       - run: python -m pip install PyYAML==6.0.2
       - name: Check onboarding, pairing and persistence in a disposable container
         run: python tests/smoke_rmfakecloud.py
+  kasm:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install PyYAML==6.0.2
+      - name: Check Kasm wizard, HTTPS bridge and nested Docker persistence
+        run: python tests/smoke_kasm.py
