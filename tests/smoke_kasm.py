@@ -120,7 +120,12 @@ def check_app():
     assert '<html' in html.lower()
     assert 'socket.io/socket.io.js' not in html, 'Root still shows the installer'
     assert 'Open Kasm' not in html, 'Root still shows the old launcher'
-    assert query("SELECT proxy_port FROM zones WHERE zone_name='default';") == '0'
+    for _ in range(12):
+        if query("SELECT proxy_port FROM zones WHERE zone_name='default';") == '0':
+            break
+        time.sleep(5)
+    else:
+        raise AssertionError('Default zone did not migrate to the browser port')
     # The browser API is reached through the same gateway as the UI.
     # Never log its credential-bearing response.
     def login(password):
@@ -133,8 +138,8 @@ def check_app():
         except urllib.error.HTTPError:
             return {}
     auth = login(admin_password)
-    assert auth.get('session_token'), f'Login failed; response keys: {list(auth)}'
-    assert not login('invalid-password').get('session_token'), 'Wrong password accepted'
+    assert auth.get('token'), f'Login failed; response keys: {list(auth)}'
+    assert not login('invalid-password').get('token'), 'Wrong password accepted'
 
 
 with tempfile.TemporaryDirectory(prefix=prefix) as temporary:
