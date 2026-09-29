@@ -2,7 +2,7 @@ manifestVersion: 1
 id: livinduck-kasm
 category: networking
 name: Kasm Workspaces
-version: "1.19.0"
+version: "1.19.0-1"
 tagline: Stream desktops and applications to your browser
 description: >-
   Open the app and select Setup & updates to complete the Kasm installation
@@ -30,7 +30,11 @@ description: >-
   files between sessions. Keep the setup wizard enabled for browser-based
   upgrades. Updating the Umbrel package alone does not upgrade an existing
   Kasm installation. Kasm's own license terms apply.
-releaseNotes: ""
+releaseNotes: >-
+  Setup now returns to a page that checks Kasm's actual readiness, instead of
+  reloading the installer menu. The page waits for Kasm's HTTPS service to
+  become healthy and explains what to do while startup is still in progress.
+  The underlying Kasm version remains 1.19.0.
 developer: Kasm Technologies
 website: https://kasm.com/
 dependencies: []

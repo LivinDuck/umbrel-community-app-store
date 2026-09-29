@@ -56,7 +56,17 @@ def check_wizard():
     assert 'Open Kasm' in request('/umbrel')
     assert '39402' in request('/umbrel')
     assert 'socket.io' in request('/')
-    assert 'renderinstall' in request('/public/js/index.js')
+    wizard_js = request('/public/js/index.js')
+    assert 'renderinstall' in wizard_js
+    assert 'location.assign("/umbrel");' in wizard_js
+    assert 'location.reload(true);' not in wizard_js
+    # A running wizard must not be reported as a healthy Kasm installation.
+    try:
+        request('/umbrel-health')
+    except urllib.error.HTTPError as error:
+        assert error.code == 502
+    else:
+        raise AssertionError('Readiness endpoint reported success before Kasm installation')
     # Exercise the real Socket.IO polling transport through the HTTPS bridge.
     route = '/socket.io/?EIO=4&transport=polling'
     handshake = request(route)

@@ -16,7 +16,7 @@ the app. Install it when you are ready.
 | App | Version | Setup |
 | --- | --- | --- |
 | rmfakecloud | 0.0.31 | [Setup and limitations](livinduck-rmfakecloud/README.md) |
-| Kasm Workspaces | 1.19.0 | [Setup and limitations](livinduck-kasm/README.md) |
+| Kasm Workspaces | 1.19.0-1 | [Setup and limitations](livinduck-kasm/README.md) |
 
 ## Packaging workflow
 

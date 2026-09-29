@@ -9,6 +9,14 @@ server {
         root /usr/share/nginx/html;
         try_files /index.html =404;
     }
+    # Check the real application, not merely the setup wizard.
+    location = /umbrel-health {
+        proxy_pass https://livinduck-kasm_server_1:39402/api/__healthcheck;
+        proxy_ssl_verify off;
+        proxy_connect_timeout 3s;
+        proxy_read_timeout 5s;
+        add_header Cache-Control "no-store" always;
+    }
     location / {
         proxy_pass https://livinduck-kasm_server_1:3000;
         # The wizard generates a self-signed certificate on first start.
@@ -20,5 +28,10 @@ server {
         proxy_read_timeout 3600s;
         proxy_send_timeout 3600s;
         proxy_buffering off;
+        # Upstream reloads the wizard after install, which can look like a reset.
+        # Return to our readiness page instead of offering setup again.
+        proxy_set_header Accept-Encoding "";
+        sub_filter_types application/javascript text/javascript;
+        sub_filter 'location.reload(true);' 'location.assign("/umbrel");';
     }
 }

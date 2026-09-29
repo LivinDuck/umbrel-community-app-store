@@ -1,4 +1,4 @@
-# Kasm Workspaces 1.19.0
+# Kasm Workspaces 1.19.0 (package 1.19.0-1)
 
 This package uses LinuxServer.io's `1.19.0-ls150` image, pinned by its public
 AMD64/ARM64 index digest. It runs a nested Docker engine in privileged mode.
@@ -13,7 +13,8 @@ sidecar bridges the HTTPS setup wizard to Umbrel's authenticated app proxy.
    passwords for `admin@kasm.local` and `user@kasm.local`.
 3. Select only the workspace images you need. Downloads need internet access
    and may consume many gigabytes. Wait for the wizard to finish.
-4. Return to the launch page and select **Open Kasm**. It uses your browser's
+4. When setup completes, it returns to the launch page. Wait for **Kasm is ready**,
+   then select **Open Kasm**. It uses your browser's
    current hostname with **HTTPS port 39402**. Expect a self-signed certificate
    warning on first access; proceed only for your own trusted server.
 5. Sign in using the administrator password you chose. Use `user@kasm.local`
@@ -34,6 +35,19 @@ implicitly expose port 39402; public reverse-proxy deployment needs separate
 TLS, routing and Kasm zone configuration. Other containers on Umbrel's shared
 Docker network can reach the wizard directly; this is not an isolation boundary
 against a compromised neighboring app.
+
+## Startup status
+
+The launch page polls Kasm's actual HTTPS API health endpoint every five seconds
+until it is ready. A running setup wizard does not mean Kasm itself is ready.
+Initial startup can continue for several minutes after installation work.
+Keep an active installer open; do not start concurrent installation attempts.
+If the installer reports an error, retain its terminal output for diagnosis.
+
+This package revision changes the completion redirect and readiness display;
+it does not change the upstream image or automatically repair failed network
+plugins. An observed initial network-plugin error on the user's ARM64 host was
+followed by a healthy installation without any intervention from this package.
 
 ## Data and recovery
 
@@ -86,5 +100,7 @@ persistence after recreation, and launch-page access when the wizard is disabled
 
 These checks do not accept the EULA, create Kasm accounts, download desktop
 workspaces or prove a full Kasm installation. Umbrel app-proxy authentication,
-real Umbrel installation/update, browser desktop streaming and hardware-specific
-nested Docker behavior remain untested. See the workflow for actual CI results.
+full installation/update automation and browser desktop streaming remain untested.
+Read-only inspection of the user's ARM64 Umbrel confirmed that the existing
+installation eventually served its login page and returned a healthy API response;
+no repair or restart was performed on that host. See the workflow for actual CI results.
