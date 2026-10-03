@@ -210,6 +210,12 @@ def main():
         except Exception:
             # Auth manager can log a generated recovery key. Do not dump app logs.
             print(compose('ps', '--all', check=False))
+            for line in compose('logs', '--no-color', '--tail', '100', 'server', check=False).splitlines():
+                if any(phrase in line.lower() for phrase in (
+                    'failed to create', 'failed to pull', 'error response from daemon',
+                    'failed to start', 'failed to connect',
+                )):
+                    print(line.replace(seed, '[REDACTED]').replace(ACCOUNT['password'], '[REDACTED]'))
             raise
         finally:
             compose('down', '--timeout', '120', check=False)
