@@ -175,6 +175,11 @@ def main():
                     'startImmediately': False,
                 })['server']
                 servers.append(server)
+                # CreateServer returns before its image pull and container
+                # creation finish. Match the UI's creating -> stopped flow;
+                # starting sooner races the upstream background operation.
+                wait_for(lambda: rpc('ServerService', 'GetServer', {'id': server['id']})['server'].get('containerId'),
+                         'asynchronous server container creation', seconds=300)
             server_id = servers[0]['id']
             rpc('ConfigService', 'UpdateServerConfig', {'serverId': server_id, 'updates': {
                 'eula': 'TRUE', 'viewDistance': '3', 'simulationDistance': '3',
