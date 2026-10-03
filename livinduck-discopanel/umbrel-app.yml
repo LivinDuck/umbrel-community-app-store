@@ -1,0 +1,45 @@
+manifestVersion: 1
+id: livinduck-discopanel
+storage:
+  dataRoot: data
+category: social
+name: DiscoPanel
+version: "2.0.15"
+tagline: Create and manage your Minecraft servers
+description: >-
+  Install, open DiscoPanel, and create your administrator account. Then create
+  Minecraft servers, choose versions and mod loaders, manage files, and use the
+  live console from the browser. No terminal or separate Docker setup is needed.
+
+
+  Run multiple Java Edition servers with Vanilla, Paper, Fabric, Forge and more.
+  Install Modrinth modpacks, or add your own mods and plugins through the panel.
+  CurseForge downloads require your own optional CurseForge API key.
+
+
+  Game ports 25565 through 25574 are ready to use. Friends on your local network
+  connect to your Umbrel address and the server's port. For internet play,
+  forward the chosen TCP game port on your router. Router forwarding and UPnP
+  are not configured automatically. Start with one small server on an 8 GB device.
+
+
+  Umbrel login protects the panel, and DiscoPanel has its own account login.
+  Worlds, settings, accounts and backups persist across app restarts and updates.
+  The app includes a dedicated container engine for its game servers.
+releaseNotes: ""
+developer: Nicholas W. Heyer and contributors
+website: https://discopanel.app
+dependencies: []
+repo: https://github.com/discohaus/discopanel
+support: https://github.com/LivinDuck/umbrel-community-app-store/issues
+port: 39403
+gallery: []
+path: ""
+defaultUsername: ""
+defaultPassword: ""
+submitter: LivinDuck
+submission: https://github.com/LivinDuck/umbrel-community-app-store
+icon: https://raw.githubusercontent.com/LivinDuck/umbrel-community-app-store/main/livinduck-discopanel/icon.png
+backupIgnore:
+  - data/run
+  - data/tmp

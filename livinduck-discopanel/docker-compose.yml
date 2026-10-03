@@ -1,0 +1,87 @@
+version: "3.7"
+
+services:
+  app_proxy:
+    environment:
+      # The panel shares this service's network namespace so it can reach its
+      # nested game containers, their console ports, and proxy backends.
+      APP_HOST: livinduck-discopanel_engine_1
+      APP_PORT: 8080
+
+  engine:
+    image: docker:29.8.2-dind@sha256:7dcdfc4a20246236f558175182ccace1eb15a41bd3eb119dd2284f393498b7c1
+    # Required for the app's nested engine. Never mount Umbrel's Docker socket.
+    privileged: true
+    restart: on-failure
+    stop_grace_period: 2m
+    command:
+      - dockerd
+      - --host=unix:///run/discopanel/docker.sock
+      - --storage-driver=overlay2
+      - --feature=containerd-snapshotter=false
+      - --bip=172.30.0.1/24
+      - --default-address-pool=base=172.31.0.0/16,size=24
+      - --log-driver=local
+      - --log-opt=max-size=10m
+      - --log-opt=max-file=3
+    environment:
+      DOCKER_HOST: unix:///run/discopanel/docker.sock
+      DOCKER_TLS_CERTDIR: ""
+    healthcheck:
+      test: ["CMD", "docker", "info"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 10s
+    ports:
+      # Ten direct game ports. Upstream reserves game-port + 10 for local RCON;
+      # those console ports must not be published to the LAN.
+      - "25565-25574:25565-25574/tcp"
+      - "25565-25574:25565-25574/udp"
+      # Optional modules allocate from this range, including UDP for Geyser.
+      - "39410-39419:39410-39419/tcp"
+      - "39410-39419:39410-39419/udp"
+    volumes:
+      - ${APP_DATA_DIR}/data/engine:/var/lib/docker
+      - ${APP_DATA_DIR}/data/run:/run/discopanel
+      # Identical paths in both services let the nested engine bind server data.
+      - ${APP_DATA_DIR}/data/panel:/app/data
+      - ${APP_DATA_DIR}/data/backups:/app/backups
+      - ${APP_DATA_DIR}/data/tmp:/app/tmp
+
+  server:
+    image: nickheyer/discopanel:2.0.15@sha256:4b8bd7d13bceaa4fbb06846760814fcaecf29a4383dbb3b8563b5df23efde192
+    restart: on-failure
+    init: true
+    stop_grace_period: 90s
+    network_mode: service:engine
+    depends_on:
+      engine:
+        condition: service_healthy
+    environment:
+      DOCKER_HOST: unix:///run/discopanel/docker.sock
+      DISCOPANEL_DOCKER_HOST: unix:///run/discopanel/docker.sock
+      DISCOPANEL_SERVER_HOST: 0.0.0.0
+      DISCOPANEL_SERVER_PORT: "8080"
+      DISCOPANEL_DATA_DIR: /app/data
+      DISCOPANEL_HOST_DATA_PATH: /app/data
+      DISCOPANEL_STORAGE_DATA_DIR: /app/data
+      DISCOPANEL_STORAGE_BACKUP_DIR: /app/backups
+      DISCOPANEL_STORAGE_TEMP_DIR: /app/tmp
+      DISCOPANEL_DATABASE_PATH: /app/data/discopanel.db
+      DISCOPANEL_LOGGING_FILE_PATH: /app/data/discopanel.log
+      DISCOPANEL_AUTH_JWT_SECRET: ${APP_SEED}
+      DISCOPANEL_AUTH_ANONYMOUS_ACCESS: "false"
+      DISCOPANEL_AUTH_LOCAL_ENABLED: "true"
+      DISCOPANEL_AUTH_LOCAL_ALLOW_REGISTRATION: "false"
+      # Direct IP:port joins work immediately; domain routing stays optional.
+      DISCOPANEL_PROXY_ENABLED: "false"
+      DISCOPANEL_PROXY_PORT_RANGE_MIN: "25565"
+      DISCOPANEL_PROXY_PORT_RANGE_MAX: "25574"
+      DISCOPANEL_MODULE_PORT_RANGE_MIN: "39410"
+      DISCOPANEL_MODULE_PORT_RANGE_MAX: "39419"
+    volumes:
+      - ${APP_DATA_DIR}/data/run:/run/discopanel
+      - ${APP_DATA_DIR}/data/panel:/app/data
+      - ${APP_DATA_DIR}/data/backups:/app/backups
+      - ${APP_DATA_DIR}/data/tmp:/app/tmp
