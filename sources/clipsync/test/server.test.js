@@ -1,4 +1,5 @@
 import test from 'node:test';
+import http from 'node:http';
 import assert from 'node:assert/strict';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -11,11 +12,11 @@ const password = 'disposable-test-password';
 const deviceId = 'test-device-1234';
 const item = { id: 'clip-1', text: 'hello from Mac', timestamp: Date.now(), deviceId, deviceName: 'Mac', contentType: 'text' };
 
-async function fixture() {
+async function fixture(options = {}) {
   const dataDir = mkdtempSync(join(tmpdir(), 'clipsync-'));
   let app, api, web;
   async function start() {
-    app = await createClipSync({ dataDir, host: '127.0.0.1', apiPort: 0, webPort: 0, adminPassword: password });
+    app = await createClipSync({ dataDir, host: '127.0.0.1', apiPort: 0, webPort: 0, adminPassword: password, ...options });
     const ports = await app.listen(); api = `http://127.0.0.1:${ports.apiPort}`; web = `http://127.0.0.1:${ports.webPort}`;
   }
   await start();
@@ -95,4 +96,29 @@ test('TLS config uses DNS validation and only the dedicated port; strips local i
   assert.equal(challenges.http.disabled, true); assert.equal(challenges['tls-alpn'].disabled, true);
   assert.equal(challenges.dns.provider.name, 'cloudflare');
   assert.equal(validateItem({ ...item, localImageUri: 'content://private' }, { id: deviceId, name: 'Mac' }).localImageUri, undefined);
+});
+
+
+test('private Caddy configuration avoids browser origin headers and applies saved DNS settings', async () => {
+  const configs = [];
+  const caddy = http.createServer(async (req, res) => {
+    if (req.headers['sec-fetch-mode'] || req.headers.origin) { res.writeHead(403); res.end(); return; }
+    const chunks = []; for await (const chunk of req) chunks.push(chunk);
+    configs.push(JSON.parse(Buffer.concat(chunks).toString()));
+    res.end('{}');
+  });
+  await new Promise(resolve => caddy.listen(0, '127.0.0.1', resolve));
+  const f = await fixture({ caddyAdmin: `http://127.0.0.1:${caddy.address().port}` });
+  try {
+    await f.unlock();
+    await f.request('/admin/settings', { admin: true, method: 'POST', data: { publicUrl: 'https://sync.example.com:39443', cloudflareToken: 'a'.repeat(40) } });
+    const state = await f.request('/admin/settings', { admin: true });
+    assert.match(state.tlsStatus, /Automatic HTTPS configured/);
+    assert.equal(state.hasCloudflareToken, true);
+    assert.equal(state.cloudflareToken, undefined);
+    assert.equal(configs.at(-1).apps.tls.automation.policies[0].issuers[0].challenges['tls-alpn'].disabled, true);
+    await f.request('/admin/settings', { admin: true, method: 'POST', data: { publicUrl: 'https://sync.example.com:39443', clearCloudflareToken: true } });
+    assert.equal(configs.at(-1).apps, undefined);
+    assert.equal((await f.request('/admin/settings', { admin: true })).hasCloudflareToken, false);
+  } finally { await f.close(); await new Promise(resolve => caddy.close(resolve)); }
 });

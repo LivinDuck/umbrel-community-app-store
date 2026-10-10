@@ -111,11 +111,25 @@ export async function createClipSync(options = {}) {
     if (origin && new URL(origin).host !== req.headers.host && new URL(origin).host !== req.headers['x-forwarded-host']) throw fail(403, 'Invalid origin');
     if (req.headers['sec-fetch-site'] === 'cross-site') throw fail(403, 'Invalid origin');
   }
+  // Node fetch adds browser Fetch Metadata headers; Caddy correctly applies its
+  // browser-origin checks to those. This is a private service-to-service request.
+  function requestCaddy(path, method = 'GET', config) {
+    return new Promise((resolve, reject) => {
+      const request = http.request(new URL(caddyAdmin + path), {
+        method, headers: config ? { 'Content-Type': 'application/json' } : {}
+      }, response => {
+        response.resume();
+        resolve({ ok: response.statusCode >= 200 && response.statusCode < 300 });
+      });
+      request.setTimeout(5000, () => request.destroy(new Error('HTTPS helper timed out')));
+      request.on('error', reject);
+      request.end(config ? JSON.stringify(config) : undefined);
+    });
+  }
   async function configureTLS() {
     if (!caddyAdmin) { tlsStatus = 'Use an existing HTTPS reverse proxy, or deploy the bundled HTTPS helper'; return; }
     try {
-      const response = await fetch(`${caddyAdmin}/load`, { method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(caddyConfig(networkSettings(), upstream)), signal: AbortSignal.timeout(5000) });
+      const response = await requestCaddy('/load', 'POST', caddyConfig(networkSettings(), upstream));
       if (!response.ok) throw new Error('TLS configuration rejected');
       tlsStatus = networkSettings().cloudflareToken ? 'Automatic HTTPS configured. Certificate issuance/renewal runs in the background; test the public URL before pairing.' : 'Built-in HTTPS disabled. Use an existing HTTPS reverse proxy, or configure Cloudflare above.';
     } catch { tlsStatus = 'HTTPS proxy is unavailable or rejected configuration. Retrying automatically.'; }
@@ -258,7 +272,7 @@ export async function createClipSync(options = {}) {
     if (closing || !caddyAdmin || !networkSettings().cloudflareToken) return;
     // Reapply after a proxy restart; never require a user-run restart.
     try {
-      const res = await fetch(`${caddyAdmin}/config/apps/http/servers/clipsync`, { signal: AbortSignal.timeout(3000) });
+      const res = await requestCaddy('/config/apps/http/servers/clipsync');
       if (!res.ok || tlsStatus.startsWith('HTTPS proxy') || appliedTLS !== JSON.stringify(networkSettings())) {
         await configureTLS(); appliedTLS = JSON.stringify(networkSettings());
       }
