@@ -126,6 +126,40 @@ try:
             diagnostic = "fetch('http://tls:2019/load',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({admin:{listen:'0.0.0.0:2019'}})}).then(async r=>console.log(r.status,await r.text())).catch(e=>console.log(e.message,e.cause?.code))"
             print(docker('exec', name, 'node', '-e', diagnostic))
             raise AssertionError(state['tlsStatus'])
+        # Exercise the actual TLS listener and WebSocket proxy using an isolated
+        # internal test CA. No public ACME request or real DNS credential is used.
+        tls_check = """
+import http from 'node:http';
+import https from 'node:https';
+import assert from 'node:assert/strict';
+import {WebSocket} from 'ws';
+import {caddyConfig} from './src/server.js';
+const config=caddyConfig({publicUrl:'https://sync.example.com:39443',cloudflareToken:'a'.repeat(40)});
+config.apps.tls.automation.policies[0].issuers=[{module:'internal'}];
+await new Promise((resolve,reject)=>{
+ const req=http.request('http://tls:2019/load',{method:'POST',headers:{'Content-Type':'application/json'}},res=>{res.resume();res.statusCode===200?resolve():reject(new Error('TLS test config '+res.statusCode));});
+ req.on('error',reject);req.end(JSON.stringify(config));
+});
+const get=path=>new Promise((resolve,reject)=>{
+ const req=https.request({hostname:'tls',port:8443,servername:'sync.example.com',path,headers:{Host:'sync.example.com:39443'},rejectUnauthorized:false},res=>{res.resume();resolve(res.statusCode);});
+ req.on('error',reject);req.end();
+});
+let healthy=false;
+for(let attempt=0;attempt<30;attempt++){try{healthy=(await get('/health'))===200;if(healthy)break;}catch{}await new Promise(r=>setTimeout(r,500));}
+assert.equal(healthy,true);
+assert.equal(await get('/admin/settings'),404);
+const socket=new WebSocket('wss://tls:8443/v1/events',{servername:'sync.example.com',rejectUnauthorized:false,headers:{Host:'sync.example.com:39443',Authorization:'Bearer '+TOKEN}});
+await new Promise((resolve,reject)=>{
+ const timer=setTimeout(()=>reject(new Error('TLS WebSocket timeout')),10000);
+ socket.once('message',data=>{try{assert.equal(JSON.parse(data).item.id,'clip-ci');clearTimeout(timer);resolve();}catch(e){reject(e);}});
+ socket.once('error',reject);
+});
+socket.close();
+console.log('PASS: dedicated-port HTTPS, admin isolation and WebSocket proxy');
+""".replace('TOKEN', json.dumps(receiver))
+        result = subprocess.run(['docker', 'exec', '-i', '-w', '/app', name, 'node', '--input-type=module'], input=tls_check, text=True, capture_output=True)
+        assert result.returncode == 0, result.stderr
+        print(result.stdout.strip())
         docker('rm', '-f', name)
         web, api = start(data)
         assert json.loads(request(api, '/v1/clipboard', token=receiver)[0]) == item

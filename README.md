@@ -18,7 +18,7 @@ the app. Install it when you are ready.
 | rmfakecloud | 0.0.31 | [Setup and limitations](livinduck-rmfakecloud/README.md) |
 | Kasm Workspaces | 1.19.0-2 | [Setup and limitations](livinduck-kasm/README.md) |
 | DiscoPanel | 2.0.15 | [Setup and limitations](livinduck-discopanel/README.md) |
-| ClipSync | 1.0.1 | [Pairing and dedicated-port HTTPS setup](livinduck-clipsync/README.md) |
+| ClipSync | 1.0.2 | [Pairing and dedicated-port HTTPS setup](livinduck-clipsync/README.md) |
 
 ## Packaging workflow
 
