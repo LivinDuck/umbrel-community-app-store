@@ -121,7 +121,11 @@ try:
         docker('exec', name + '-tls', 'caddy', 'validate', '--config', '/tmp/caddy-test.json')
         # Server and Caddy can communicate on the private network; WAN has no admin route.
         state = json.loads(request(web, '/admin/settings', cookie=cookie)[0])
-        assert 'disabled' in state['tlsStatus'].lower(), state['tlsStatus']
+        if 'disabled' not in state['tlsStatus'].lower():
+            print(docker('logs', name + '-tls'))
+            diagnostic = "fetch('http://tls:2019/load',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({admin:{listen:'0.0.0.0:2019'}})}).then(async r=>console.log(r.status,await r.text())).catch(e=>console.log(e.message,e.cause?.code))"
+            print(docker('exec', name, 'node', '-e', diagnostic))
+            raise AssertionError(state['tlsStatus'])
         docker('rm', '-f', name)
         web, api = start(data)
         assert json.loads(request(api, '/v1/clipboard', token=receiver)[0]) == item
