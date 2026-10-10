@@ -11,7 +11,9 @@ const hash = value => createHash('sha256').update(value).digest('hex');
 const secret = () => randomBytes(32).toString('base64url');
 const equal = (a, b) => timingSafeEqual(Buffer.from(hash(a)), Buffer.from(hash(b)));
 const fail = (status, message) => Object.assign(new Error(message), { status });
-const MAX_BODY = 2_100_000;
+export const MAX_IMAGE_BYTES = 30_000_000;
+const MAX_IMAGE_BASE64 = 4 * Math.ceil(MAX_IMAGE_BYTES / 3);
+const MAX_BODY = MAX_IMAGE_BASE64 + 300_000;
 
 export function validateItem(item, device) {
   if (!item || typeof item !== 'object' || Array.isArray(item)) throw fail(400, 'Invalid clipboard');
@@ -24,10 +26,11 @@ export function validateItem(item, device) {
   const result = { id: item.id, text: item.text, timestamp: item.timestamp, deviceId: device.id,
     deviceName: device.name, contentType: item.contentType ?? 'text' };
   if (result.contentType === 'image') {
-    if (typeof item.imageData !== 'string' || item.imageData.length > 2_000_000 || !/^[A-Za-z0-9+/]*={0,2}$/.test(item.imageData)) throw fail(400, 'Invalid image');
+    if (typeof item.imageData === 'string' && item.imageData.length > MAX_IMAGE_BASE64) throw fail(413, 'Image exceeds 30 MB');
+    if (typeof item.imageData !== 'string' || !/^[A-Za-z0-9+/]*={0,2}$/.test(item.imageData)) throw fail(400, 'Invalid image');
     const bytes = Buffer.from(item.imageData, 'base64');
     if (bytes.toString('base64') !== item.imageData) throw fail(400, 'Invalid image encoding');
-    if (!bytes.length || bytes.length > 1_500_000) throw fail(413, 'Image exceeds 1.5 MB');
+    if (!bytes.length || bytes.length > MAX_IMAGE_BYTES) throw fail(413, 'Image exceeds 30 MB');
     if (!['image/png', 'image/jpeg', 'image/webp', 'image/gif'].includes(item.mimeType)) throw fail(400, 'Unsupported image type');
     result.imageData = item.imageData; result.mimeType = item.mimeType;
     result.imageName = typeof item.imageName === 'string' ? item.imageName.slice(0, 200) : 'Clipboard image';
@@ -267,7 +270,7 @@ export async function createClipSync(options = {}) {
       throw fail(404, 'Not found');
     } catch (error) { if (!res.headersSent) json(res, error.status ?? 500, { error: error.status ? error.message : 'Server error' }); }
   });
-  for (const server of [api, web]) { server.requestTimeout = 30_000; server.headersTimeout = 15_000; server.maxHeadersCount = 40; }
+  for (const server of [api, web]) { server.requestTimeout = 180_000; server.headersTimeout = 15_000; server.maxHeadersCount = 40; }
   const heartbeat = setInterval(() => {
     for (const ws of sockets.clients) { if (!ws.alive) { ws.terminate(); continue; } ws.alive = false; ws.ping(); }
     for (const map of [sessions, codes, limits]) for (const [key, value] of map) if ((typeof value === 'number' ? value : value.expiresAt ?? value.until) < now()) map.delete(key);

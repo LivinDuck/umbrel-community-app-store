@@ -55,7 +55,7 @@ test('pair, instant push, image, reconnect snapshot, persistent credentials, and
     const delivered = once(ws, 'message');
     await f.request('/v1/clipboard', { method: 'PUT', token: paired.token, data: item });
     assert.deepEqual(JSON.parse((await delivered)[0]).item, item);
-    const image = { ...item, id: 'image-1', text: '', contentType: 'image', imageData: Buffer.alloc(1_500_000, 7).toString('base64'), mimeType: 'image/png', imageName: 'Clipboard image' };
+    const image = { ...item, id: 'image-1', text: '', contentType: 'image', imageData: Buffer.alloc(30_000_000, 7).toString('base64'), mimeType: 'image/png', imageName: 'Clipboard image' };
     const deliveredImage = once(ws, 'message');
     await f.request('/v1/clipboard', { method: 'PUT', token: paired.token, data: image });
     assert.deepEqual(JSON.parse((await deliveredImage)[0]).item, image);
@@ -162,5 +162,20 @@ test('fresh Umbrel dashboard opens without configuring a ClipSync password', asy
   try {
     assert.deepEqual(await f.request('/admin/status', { admin: true }), { configured: false, unlocked: true, authMode: 'umbrel' });
     assert.deepEqual((await f.request('/admin/settings', { admin: true })).devices, []);
+  } finally { await f.close(); }
+});
+
+
+test('30 MB image boundary rejects one byte over without changing the current clipboard', async () => {
+  const f = await fixture();
+  try {
+    await f.unlock();
+    await f.request('/admin/settings', { admin: true, method: 'POST', data: { publicUrl: 'https://sync.example.com:39443' } });
+    const { token } = await f.pair();
+    await f.request('/v1/clipboard', { method: 'PUT', token, data: item });
+    const oversized = { ...item, text: '', contentType: 'image', imageData: Buffer.alloc(30_000_001).toString('base64'), mimeType: 'image/png' };
+    const error = await f.request('/v1/clipboard', { method: 'PUT', token, data: oversized, expected: 413 });
+    assert.match(error.error, /30 MB/);
+    assert.equal((await f.request('/v1/clipboard', { token })).id, item.id);
   } finally { await f.close(); }
 });
