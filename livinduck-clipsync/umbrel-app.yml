@@ -4,7 +4,7 @@ storage:
   dataRoot: data
 category: files
 name: ClipSync
-version: "1.0.0"
+version: "1.0.1"
 tagline: Sync your Android and Mac clipboard through your own server
 description: >-
   Open ClipSync and unlock settings with the app password shown by Umbrel.
@@ -29,7 +29,7 @@ description: >-
   operating system's background clipboard rules. The Mac uploads copies
   automatically; Android retains its foreground receiving service and app or
   Quick Settings sending actions. See the setup guide for full instructions.
-releaseNotes: ""
+releaseNotes: "Correct automatic HTTPS configuration for Cloudflare DNS certificate validation."
 developer: LivinDuck
 website: https://github.com/LivinDuck/umbrel-community-app-store/tree/main/sources/clipsync
 dependencies: []
