@@ -1,0 +1,31 @@
+name: Validate ClipSync
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - livinduck-clipsync/**
+      - tests/smoke_clipsync.py
+      - .github/workflows/clipsync-validation.yml
+  pull_request:
+    paths:
+      - livinduck-clipsync/**
+      - tests/smoke_clipsync.py
+      - .github/workflows/clipsync-validation.yml
+permissions:
+  contents: read
+jobs:
+  smoke:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install PyYAML==6.0.2 websocket-client==1.8.0
+      - name: Test pairing, instant delivery, persistence, revocation and DNS-only TLS configuration
+        run: python -u tests/smoke_clipsync.py

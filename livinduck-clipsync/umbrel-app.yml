@@ -1,0 +1,46 @@
+manifestVersion: 1
+id: livinduck-clipsync
+storage:
+  dataRoot: data
+category: files
+name: ClipSync
+version: "1.0.0"
+tagline: Sync your Android and Mac clipboard through your own server
+description: >-
+  Open ClipSync and unlock settings with the app password shown by Umbrel.
+  Choose a public HTTPS address, configure automatic certificates with a
+  Cloudflare DNS API token, and generate one-time codes to pair your devices.
+  Select Your server in the updated ClipSync Android and Mac apps.
+
+
+  Clipboard updates arrive automatically over a persistent connection. No
+  Google account or Firebase is needed for this backend. Text and images are
+  supported, with the latest item stored on your server and history kept locally
+  in your apps. Remove a device in the dashboard to revoke its access.
+
+
+  WAN access uses dedicated TCP port 39443. Forward that port on your router;
+  leave the dashboard private. DNS certificate validation does not claim ports
+  80 or 443, redirect existing HTTP services, or change your DNS address records.
+  The Cloudflare token needs Zone DNS Edit and Zone Read for your zone.
+
+
+  Automatic syncing still depends on an active device connection and the
+  operating system's background clipboard rules. The Mac uploads copies
+  automatically; Android retains its foreground receiving service and app or
+  Quick Settings sending actions. See the setup guide for full instructions.
+releaseNotes: ""
+developer: LivinDuck
+website: https://github.com/LivinDuck/umbrel-community-app-store/tree/main/sources/clipsync
+dependencies: []
+repo: https://github.com/LivinDuck/umbrel-community-app-store
+support: https://github.com/LivinDuck/umbrel-community-app-store/issues
+port: 39440
+gallery: []
+path: ""
+defaultUsername: ""
+defaultPassword: ""
+deterministicPassword: true
+submitter: LivinDuck
+submission: https://github.com/LivinDuck/umbrel-community-app-store
+icon: https://raw.githubusercontent.com/LivinDuck/umbrel-community-app-store/main/livinduck-clipsync/icon.svg

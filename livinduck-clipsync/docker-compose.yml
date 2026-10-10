@@ -1,0 +1,48 @@
+version: "3.7"
+
+services:
+  app_proxy:
+    environment:
+      APP_HOST: livinduck-clipsync_server_1
+      APP_PORT: 3000
+    # Umbrel authenticates every browser route. No public auth exemptions.
+    networks:
+      - default
+      - clipsync
+
+  server:
+    image: ghcr.io/livinduck/clipsync-server:1.0.0-1799bccaf6a92783e2a5b91a6a90a1e213f4ee67@sha256:aba2dd3431bf5602058f6a7125a16568bb400db50af7c0c3554c36791fa5f679
+    user: "1000:1000"
+    init: true
+    restart: on-failure
+    stop_grace_period: 30s
+    environment:
+      PORT: "3000"
+      API_PORT: "3001"
+      DATA_DIR: /data
+      ADMIN_PASSWORD: ${APP_PASSWORD}
+      CADDY_ADMIN_URL: http://tls:2019
+      SYNC_UPSTREAM: server:3001
+    volumes:
+      - ${APP_DATA_DIR}/data/state:/data
+    networks:
+      - clipsync
+
+  tls:
+    image: ghcr.io/livinduck/clipsync-tls:1.0.0-1799bccaf6a92783e2a5b91a6a90a1e213f4ee67@sha256:e34da59512523bdb98327820ecec8011fcfe8918f9139777cca1302b39be8d4e
+    user: "1000:1000"
+    restart: on-failure
+    stop_grace_period: 30s
+    # Dedicated ClipSync TLS port only. Do not bind/redirect HTTP 80 or HTTPS 443.
+    ports:
+      - "39443:8443/tcp"
+    volumes:
+      - ${APP_DATA_DIR}/data/certificates:/data
+      - ${APP_DATA_DIR}/data/tls-config:/config
+    networks:
+      - clipsync
+
+# Isolate the certificate helper's administrative API from other Umbrel apps.
+# This bridge still permits outbound DNS/ACME requests; it isn't a host network.
+networks:
+  clipsync:
