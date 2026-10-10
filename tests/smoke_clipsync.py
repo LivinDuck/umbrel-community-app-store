@@ -1,4 +1,5 @@
 """Disposable Docker integration checks. Never connects to the user's NAS or DNS."""
+import base64
 import json
 import os
 from pathlib import Path
@@ -123,7 +124,9 @@ try:
                                          header={'Authorization': 'Bearer ' + receiver}, suppress_origin=True, timeout=10)
         assert json.loads(ws.recv())['item'] is None
         item = {'id': 'clip-ci', 'text': 'instant delivery', 'timestamp': 1000,
-                'deviceId': 'mac-test-device', 'deviceName': 'mac-test-device', 'contentType': 'text'}
+                'deviceId': 'mac-test-device', 'deviceName': 'mac-test-device', 'contentType': 'image',
+                'imageData': base64.b64encode(bytes([7]) * 30_000_000).decode(),
+                'mimeType': 'image/png', 'imageName': '30 MB test image'}
         request(api, '/v1/clipboard', item, method='PUT', token=sender)
         assert json.loads(ws.recv())['item'] == item
         ws.close()

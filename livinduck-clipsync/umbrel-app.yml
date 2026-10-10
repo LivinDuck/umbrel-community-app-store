@@ -4,7 +4,7 @@ storage:
   dataRoot: data
 category: files
 name: ClipSync
-version: "1.0.3"
+version: "1.0.4"
 tagline: Sync your Android and Mac clipboard through your own server
 description: >-
   Open ClipSync directly after signing in to Umbrel. No second password is needed.
@@ -29,7 +29,7 @@ description: >-
   operating system's background clipboard rules. The Mac uploads copies
   automatically; Android retains its foreground receiving service and app or
   Quick Settings sending actions. See the setup guide for full instructions.
-releaseNotes: "Remove the extra ClipSync dashboard password. Sign in through Umbrel and open settings directly. Existing connection settings, certificates, and device pairings are preserved."
+releaseNotes: "Send images up to 30 MB through your server. Update the Mac and Android apps to version 1.1 to use the larger limit. Existing pairing and automatic background delivery are preserved."
 developer: LivinDuck
 website: https://github.com/LivinDuck/umbrel-community-app-store/tree/main/sources/clipsync
 dependencies: []

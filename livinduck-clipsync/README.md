@@ -29,7 +29,7 @@ Runtime settings: `HOST` (default `0.0.0.0`), `PORT` (dashboard, default 3000), 
 ## Behavior and limitations
 
 - One shared clipboard per server, with up to 100 paired devices. This is a personal relay, not a multi-tenant account service.
-- Text up to 32,768 characters and images up to 1,500,000 bytes. Native clients retain their existing limits.
+- Text up to 32,768 characters and images up to 30,000,000 bytes. Update both native apps for 30 MB images. Firebase retains its separate 1.5 MB image limit.
 - Only the latest clipboard is retained remotely. History stays in the apps. ClipSync uses TLS in transit; server storage is not end-to-end encrypted. Back up the app data directory and protect those backups, including DNS credentials and the latest clipboard.
 - The Mac keeps its existing automatic-copy monitor; Android keeps its foreground receiving service and its app/Quick Settings sending actions. This does not bypass Android’s background clipboard restrictions or operating-system suspension.
 - WebSockets use heartbeat frames, automatic reconnection, and a fresh current-item snapshot on connection. Heartbeats check connection liveness; they do not poll the clipboard. Delivery requires an active Internet connection. This release does not add an offline upload queue.

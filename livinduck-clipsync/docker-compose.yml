@@ -11,7 +11,7 @@ services:
       - clipsync
 
   server:
-    image: ghcr.io/livinduck/clipsync-server:1.0.3-4c9e6a654996b091608a9b79515476433bcf08f2@sha256:7df16833d8f6eeada844920f04ec7f94d9c2066d91a6d821a0bebe839bed1fe6
+    image: ghcr.io/livinduck/clipsync-server:1.0.4-2be10c7a29c30db16f307136f600649e060ce7bb@sha256:508ebde9b690631f6b9e7ba00b6853cae9f422bbf3145459d09410a5d6db2026
     user: "1000:1000"
     init: true
     restart: on-failure
