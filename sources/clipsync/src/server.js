@@ -47,7 +47,7 @@ export function caddyConfig(settings, upstream = 'server:3001') {
         routes: [{ match: [{ host: [hostname] }], handle: [{ handler: 'reverse_proxy', upstreams: [{ dial: upstream }] }], terminal: true }]
       } } },
       tls: { automation: { policies: [{ subjects: [hostname], issuers: [{ module: 'acme',
-        challenges: { http: { disabled: true }, tlsalpn: { disabled: true },
+        challenges: { http: { disabled: true }, 'tls-alpn': { disabled: true },
           dns: { provider: { name: 'cloudflare', api_token: settings.cloudflareToken } } }
       }] }] } }
     }

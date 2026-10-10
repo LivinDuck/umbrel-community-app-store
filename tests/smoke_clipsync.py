@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 import secrets
 import shutil
+from contextlib import contextmanager
 import subprocess
 import tempfile
 import time
@@ -74,9 +75,20 @@ def pair(web, api, cookie, device):
     return token
 
 
+@contextmanager
+def disposable_directory():
+    directory = tempfile.mkdtemp(prefix='clipsync-ci-')
+    try:
+        yield directory
+    finally:
+        docker('rm', '-f', name, name + '-tls', check=False)
+        subprocess.run(['sudo', 'chown', '-R', f'{os.getuid()}:{os.getgid()}', directory], check=True)
+        shutil.rmtree(directory)
+
+
 try:
     docker('network', 'create', name)
-    with tempfile.TemporaryDirectory(prefix='clipsync-ci-', ignore_cleanup_errors=True) as tmp:
+    with disposable_directory() as tmp:
         data = Path(tmp) / 'data'
         data.mkdir()
         subprocess.run(['sudo', 'chown', '1000:1000', str(data)], check=True)
@@ -124,6 +136,4 @@ try:
 finally:
     docker('rm', '-f', name, name + '-tls', check=False)
     docker('network', 'rm', name, check=False)
-    if 'tmp' in globals() and Path(tmp).exists():
-        subprocess.run(['sudo', 'chown', '-R', f'{os.getuid()}:{os.getgid()}', tmp], check=True)
-        shutil.rmtree(tmp)
+

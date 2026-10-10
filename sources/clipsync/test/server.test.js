@@ -92,7 +92,7 @@ test('TLS config uses DNS validation and only the dedicated port; strips local i
   assert.deepEqual(config.apps.http.servers.clipsync.listen, [':8443']);
   assert.equal(config.apps.http.servers.clipsync.automatic_https.disable_redirects, true);
   const challenges = config.apps.tls.automation.policies[0].issuers[0].challenges;
-  assert.equal(challenges.http.disabled, true); assert.equal(challenges.tlsalpn.disabled, true);
+  assert.equal(challenges.http.disabled, true); assert.equal(challenges['tls-alpn'].disabled, true);
   assert.equal(challenges.dns.provider.name, 'cloudflare');
   assert.equal(validateItem({ ...item, localImageUri: 'content://private' }, { id: deviceId, name: 'Mac' }).localImageUri, undefined);
 });

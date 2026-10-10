@@ -38,6 +38,9 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Read server version
+        id: version
+        run: node -p "'value=' + require('./sources/clipsync/package.json').version" >> "$GITHUB_OUTPUT"
       - uses: docker/build-push-action@v6
         id: build
         with:
@@ -45,7 +48,7 @@ jobs:
           file: sources/clipsync/${{ matrix.dockerfile }}
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ghcr.io/livinduck/${{ matrix.image }}:1.0.0-${{ github.sha }}
+          tags: ghcr.io/livinduck/${{ matrix.image }}:${{ steps.version.outputs.value }}-${{ github.sha }}
           cache-from: type=gha,scope=${{ matrix.image }}
           cache-to: type=gha,mode=max,scope=${{ matrix.image }}
       - name: Record immutable image
