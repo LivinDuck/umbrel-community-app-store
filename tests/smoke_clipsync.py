@@ -48,10 +48,10 @@ def request(base, path, data=None, method=None, cookie=None, token=None, expecte
         return body, response.headers.get('Set-Cookie', '').split(';')[0]
 
 
-def start(data):
+def start(data, image=server_image, auth='umbrel'):
     docker('run', '-d', '--name', name, '--network', name, '--network-alias', 'server', '--user', '1000:1000',
-           '-p', '127.0.0.1::3000', '-p', '127.0.0.1::3001', '-e', 'ADMIN_PASSWORD=' + password,
-           '-e', 'CADDY_ADMIN_URL=http://tls:2019', '-v', str(data) + ':/data', server_image)
+           '-p', '127.0.0.1::3000', '-p', '127.0.0.1::3001', '-e', 'ADMIN_AUTH=' + auth, '-e', 'ADMIN_PASSWORD=' + password,
+           '-e', 'CADDY_ADMIN_URL=http://tls:2019', '-v', str(data) + ':/data', image)
     web = 'http://' + docker('port', name, '3000/tcp')
     api = 'http://' + docker('port', name, '3001/tcp')
     for _ in range(60):
@@ -95,12 +95,27 @@ try:
         docker('run', '-d', '--name', name + '-tls', '--network', name, '--network-alias', 'tls', tls_image)
         modules = docker('exec', name + '-tls', 'caddy', 'list-modules')
         assert 'dns.providers.cloudflare' in modules
-        web, api = start(data)
+        # Seed the previously shipped image, then replace its container while keeping data.
+        old_image = 'ghcr.io/livinduck/clipsync-server:1.0.2-1de332ee5f11dd28f5240ad618e3ab84f97da053@sha256:add15b358bf75f2bfdc717968b37f23614f8f9d69f86e8ab484a9f8cf3de80aa'
+        web, api = start(data, image=old_image, auth='password')
+        old_cookie = login(web)
+        request(web, '/admin/settings', {'publicUrl': 'https://sync.example.com:39443'}, cookie=old_cookie)
+        old_token = pair(web, api, old_cookie, 'existing-device')
+        docker('rm', '-f', name)
+        web, api = start(data, auth=compose['services']['server']['environment']['ADMIN_AUTH'])
+        request(api, '/v1/clipboard', token=old_token)
+        migrated = json.loads(request(web, '/admin/settings')[0])
+        assert migrated['publicUrl'] == 'https://sync.example.com:39443'
+        assert migrated['devices'][0]['id'] == 'existing-device'
+        print('PASS: 1.0.2 container upgrade preserves settings and pairing without a second login')
         assert b'ClipSync' in request(web, '/')[0]
         request(api, '/admin/settings', expected=404)
         request(api, '/v1/clipboard', expected=401)
-        request(web, '/admin/settings', expected=401)
-        cookie = login(web)
+        status = json.loads(request(web, '/admin/status')[0])
+        assert status['unlocked'] and status['authMode'] == 'umbrel'
+        request(web, '/admin/settings')
+        request(web, '/admin/login', {'password': password}, expected=404)
+        cookie = None
         request(web, '/admin/settings', {'publicUrl': 'https://sync.example.com:39443'}, cookie=cookie)
         sender = pair(web, api, cookie, 'mac-test-device')
         receiver = pair(web, api, cookie, 'android-test-device')
@@ -167,7 +182,8 @@ console.log('PASS: dedicated-port HTTPS, admin isolation and WebSocket proxy');
                                          header={'Authorization': 'Bearer ' + receiver}, suppress_origin=True, timeout=10)
         assert json.loads(ws.recv())['item'] == item
         ws.close()
-        cookie = login(web)
+        assert json.loads(request(web, '/admin/status')[0])['unlocked']
+        cookie = None
         request(web, '/admin/devices/android-test-device', method='DELETE', cookie=cookie)
         request(api, '/v1/clipboard', token=receiver, expected=401)
         print('PASS: pairing, push, reconnect, persistence, revocation, isolated admin, DNS-only TLS configuration')

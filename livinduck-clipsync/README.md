@@ -4,7 +4,7 @@ A single-household clipboard relay for ClipSync on Android and macOS. Devices pa
 
 ## Umbrel setup
 
-Install **ClipSync** from [LivinDuck’s community app store](https://github.com/LivinDuck/umbrel-community-app-store). Open its dashboard and unlock it with the app password shown by Umbrel. This password protects the server settings; there are no device accounts.
+Install **ClipSync** from [LivinDuck’s community app store](https://github.com/LivinDuck/umbrel-community-app-store). Open its dashboard while signed in to Umbrel. Umbrel protects the dashboard; ClipSync does not ask for a second password. Existing settings, certificates, and paired devices are preserved when updating. There are no device accounts.
 
 1. Point a DNS-only hostname at your public IP using your existing DDNS. Enter `https://home.example.com:39443` in **Public server address**. No changes to existing A/AAAA/CNAME records are made by ClipSync.
 2. For automatic certificates, create a Cloudflare **API token** with **Zone → DNS → Edit** and **Zone → Zone → Read**, restricted to that DNS zone. Paste it into the dashboard and save. Use an API token, not a global API key or an Origin CA certificate.
@@ -24,7 +24,7 @@ If you already terminate trusted HTTPS, you can omit the Cloudflare token and pr
 
 Use the `sources/clipsync/` directory in this repository and run `docker compose -f compose.yml up --build -d` there. Open `http://localhost:39440` and choose the settings password on first run. The dashboard binds loopback only; access a remote Docker host through an SSH port forward or another authenticated management route. Server state and certificates use named volumes. The app is not dependent on Umbrel internals.
 
-Runtime settings: `HOST` (default `0.0.0.0`), `PORT` (dashboard, default 3000), `API_PORT` (default 3001), `DATA_DIR` (default `./data`), `ADMIN_PASSWORD` (optional preconfigured settings password, at least 12 characters), `CADDY_ADMIN_URL` (private helper endpoint), `SYNC_UPSTREAM` (internal API hostname:port). User-facing connection settings are edited in the dashboard without restarts.
+Runtime settings: `HOST` (default `0.0.0.0`), `PORT` (dashboard, default 3000), `API_PORT` (default 3001), `DATA_DIR` (default `./data`), `ADMIN_PASSWORD` (optional standalone settings password, at least 12 characters), `ADMIN_AUTH` (`password` by default; the Umbrel package sets `umbrel` because its private dashboard is protected by app_proxy—never enable this mode for an exposed dashboard), `CADDY_ADMIN_URL` (private helper endpoint), `SYNC_UPSTREAM` (internal API hostname:port). User-facing connection settings are edited in the dashboard without restarts.
 
 ## Behavior and limitations
 
@@ -44,6 +44,6 @@ The local `server/` directory is mirrored into `sources/clipsync/` in the commun
 
 ## Package validation
 
-The package uses public, digest-pinned images for amd64 and arm64. An isolated Compose bridge keeps the Caddy admin API off Umbrel's shared app network. The dashboard is protected by Umbrel auth and its generated app password; no routes are whitelisted. The native protocol is served separately on the dedicated TLS port.
+The package uses public, digest-pinned images for amd64 and arm64. An isolated Compose bridge keeps the Caddy admin API off Umbrel's shared app network. The dashboard is protected by Umbrel auth; no routes are whitelisted. The native protocol is served separately on the dedicated TLS port.
 
 Node integration tests and actual macOS/Android transport checks are separate from the Docker smoke workflow. The smoke workflow tests both architectures, creates disposable pairing credentials, exercises live delivery and persistence, and validates the DNS-only Caddy configuration without contacting Cloudflare or requesting real certificates. An actual Umbrel install and WAN certificate issuance still require the owner's machine and DNS configuration; they are not implied by these checks.

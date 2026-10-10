@@ -4,10 +4,10 @@ storage:
   dataRoot: data
 category: files
 name: ClipSync
-version: "1.0.2"
+version: "1.0.3"
 tagline: Sync your Android and Mac clipboard through your own server
 description: >-
-  Open ClipSync and unlock settings with the app password shown by Umbrel.
+  Open ClipSync directly after signing in to Umbrel. No second password is needed.
   Choose a public HTTPS address, configure automatic certificates with a
   Cloudflare DNS API token, and generate one-time codes to pair your devices.
   Select Your server in the updated ClipSync Android and Mac apps.
@@ -29,7 +29,7 @@ description: >-
   operating system's background clipboard rules. The Mac uploads copies
   automatically; Android retains its foreground receiving service and app or
   Quick Settings sending actions. See the setup guide for full instructions.
-releaseNotes: "Fix private HTTPS-helper communication and validate dedicated-port TLS and WebSocket routing."
+releaseNotes: "Remove the extra ClipSync dashboard password. Sign in through Umbrel and open settings directly. Existing connection settings, certificates, and device pairings are preserved."
 developer: LivinDuck
 website: https://github.com/LivinDuck/umbrel-community-app-store/tree/main/sources/clipsync
 dependencies: []
@@ -40,7 +40,6 @@ gallery: []
 path: ""
 defaultUsername: ""
 defaultPassword: ""
-deterministicPassword: true
 submitter: LivinDuck
 submission: https://github.com/LivinDuck/umbrel-community-app-store
 icon: https://raw.githubusercontent.com/LivinDuck/umbrel-community-app-store/main/livinduck-clipsync/icon.svg

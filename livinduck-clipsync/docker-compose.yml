@@ -11,7 +11,7 @@ services:
       - clipsync
 
   server:
-    image: ghcr.io/livinduck/clipsync-server:1.0.2-1de332ee5f11dd28f5240ad618e3ab84f97da053@sha256:add15b358bf75f2bfdc717968b37f23614f8f9d69f86e8ab484a9f8cf3de80aa
+    image: ghcr.io/livinduck/clipsync-server:1.0.3-4c9e6a654996b091608a9b79515476433bcf08f2@sha256:7df16833d8f6eeada844920f04ec7f94d9c2066d91a6d821a0bebe839bed1fe6
     user: "1000:1000"
     init: true
     restart: on-failure
@@ -20,7 +20,8 @@ services:
       PORT: "3000"
       API_PORT: "3001"
       DATA_DIR: /data
-      ADMIN_PASSWORD: ${APP_PASSWORD}
+      # The private dashboard is already protected by Umbrel app_proxy.
+      ADMIN_AUTH: umbrel
       CADDY_ADMIN_URL: http://tls:2019
       SYNC_UPSTREAM: server:3001
     volumes:
