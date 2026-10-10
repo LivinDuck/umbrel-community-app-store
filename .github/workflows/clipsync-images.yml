@@ -1,0 +1,55 @@
+name: Build ClipSync images
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - sources/clipsync/**
+      - .github/workflows/clipsync-images.yml
+permissions:
+  contents: read
+  packages: write
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm ci --prefix sources/clipsync --ignore-scripts --no-audit --no-fund
+      - run: npm test --prefix sources/clipsync
+  publish:
+    needs: test
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: clipsync-server
+            dockerfile: Dockerfile
+          - image: clipsync-tls
+            dockerfile: Dockerfile.tls
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        id: build
+        with:
+          context: sources/clipsync
+          file: sources/clipsync/${{ matrix.dockerfile }}
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ghcr.io/livinduck/${{ matrix.image }}:1.0.0-${{ github.sha }}
+          cache-from: type=gha,scope=${{ matrix.image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}
+      - name: Record immutable image
+        env:
+          IMAGE: ghcr.io/livinduck/${{ matrix.image }}
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: echo "$IMAGE@$DIGEST" >> "$GITHUB_STEP_SUMMARY"

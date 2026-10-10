@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ClipSync · Server</title><link rel="stylesheet" href="/style.css"><script src="/app.js" defer></script></head>
+<body><main>
+<header><span class="mark" aria-hidden="true">⇄</span><div><h1>ClipSync</h1><p>Your clipboard, on your server.</p></div><button id="logout" hidden>Lock settings</button></header>
+<p id="notice" role="status" aria-live="polite"></p>
+<section id="login"><h2 id="login-title">Unlock server settings</h2><p id="login-help">Use the app password shown by Umbrel. Your devices only need a one-time pairing code.</p><form id="login-form"><label for="password">Server password</label><input id="password" type="password" autocomplete="current-password" minlength="12" required><button class="primary">Unlock</button></form></section>
+<div id="settings" hidden>
+<section><h2>Connection</h2><p>Give ClipSync its own HTTPS port. Your other apps, HTTP services, and DNS address records stay unchanged.</p>
+<form id="network-form"><label for="url">Public server address</label><input id="url" type="url" placeholder="https://home.example.com:39443" required spellcheck="false" autocomplete="url"><p class="hint">Forward only TCP 39443 on your router to this machine’s port 39443. Use the full address, including the port, in both apps.</p>
+<label for="cf-token">Cloudflare API token <span>(for automatic HTTPS)</span></label><input id="cf-token" type="password" autocomplete="off" placeholder="Zone DNS Edit + Zone Read"><p class="hint">Scope the token to your domain’s zone. Certificate renewal uses temporary _acme-challenge TXT records, not ports 80 or 443. Keep the hostname DNS-only for a direct connection on this port. Leave the token blank to keep the saved token or use an existing HTTPS reverse proxy.</p>
+<label class="check"><input id="clear-token" type="checkbox"> Remove the saved Cloudflare token and disable built-in HTTPS</label><button class="primary">Save connection</button></form><p id="tls-status" class="hint"></p></section>
+<section><h2>Pair a device</h2><p>In the Android or Mac app, choose <strong>Your server</strong>. Enter the server address and a fresh code for each device.</p><button id="pair" class="primary">Create pairing code</button><div id="pair-result" hidden><p id="pair-url" class="address"></p><output id="pair-code"></output><p id="pair-expiry" class="hint"></p></div></section>
+<section><div class="section-heading"><h2>Paired devices</h2><button id="refresh">Refresh status</button></div><ul id="devices"></ul><p class="hint">Removing a device immediately disconnects it and invalidates its credentials. Clipboard contents never appear in this dashboard.</p></section>
+</div><footer>ClipSync 1.0 · Automatic delivery over a persistent connection</footer>
+</main></body></html>

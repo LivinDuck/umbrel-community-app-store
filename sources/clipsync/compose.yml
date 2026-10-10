@@ -1,0 +1,30 @@
+services:
+  server:
+    build: .
+    restart: unless-stopped
+    environment:
+      DATA_DIR: /data
+      CADDY_ADMIN_URL: http://tls:2019
+      SYNC_UPSTREAM: server:3001
+    ports:
+      - "127.0.0.1:39440:3000"
+    volumes:
+      - state:/data
+    networks: [private]
+  tls:
+    build:
+      context: .
+      dockerfile: Dockerfile.tls
+    restart: unless-stopped
+    ports:
+      - "39443:8443/tcp"
+    volumes:
+      - certificates:/data
+      - tls-config:/config
+    networks: [private]
+volumes:
+  state:
+  certificates:
+  tls-config:
+networks:
+  private:
