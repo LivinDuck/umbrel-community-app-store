@@ -34,7 +34,7 @@ async function fixture(options = {}) {
     return request('/v1/pair', { method: 'POST', data: { code, deviceId: id, deviceName: 'Test device' } });
   }
   const connect = token => new WebSocket(api.replace('http:', 'ws:') + '/v1/events', { headers: { Authorization: `Bearer ${token}` } });
-  return { request, unlock, pair, connect, async restart() { await app.close(); await start(); },
+  return { request, unlock, pair, connect, async restart(overrides = {}) { await app.close(); Object.assign(options, overrides); await start(); },
     async close() { await app.close(); rmSync(dataDir, { recursive: true, force: true }); } };
 }
 
@@ -121,4 +121,46 @@ test('private Caddy configuration avoids browser origin headers and applies save
     assert.equal(configs.at(-1).apps, undefined);
     assert.equal((await f.request('/admin/settings', { admin: true })).hasCloudflareToken, false);
   } finally { await f.close(); await new Promise(resolve => caddy.close(resolve)); }
+});
+
+
+test('Umbrel mode removes the second login while preserving pairing, state and WAN isolation across upgrades', async () => {
+  const f = await fixture({ adminPassword: '' });
+  try {
+    // Seed the existing password-protected database before changing deployment mode.
+    await f.unlock();
+    await f.request('/admin/settings', { admin: true, method: 'POST', data: { publicUrl: 'https://sync.example.com:39443' } });
+    const { token } = await f.pair();
+    await f.request('/v1/clipboard', { method: 'PUT', token, data: item });
+    await f.restart({ adminAuth: 'umbrel' });
+    const status = await f.request('/admin/status', { admin: true });
+    assert.equal(status.unlocked, true);
+    assert.equal(status.authMode, 'umbrel');
+    const settings = await f.request('/admin/settings', { admin: true });
+    assert.equal(settings.publicUrl, 'https://sync.example.com:39443');
+    assert.equal(settings.devices.length, 1);
+    const ws = f.connect(token);
+    assert.equal(JSON.parse((await once(ws, 'message'))[0]).item.id, item.id);
+    ws.terminate(); await once(ws, 'close');
+    await f.pair('new-phone-device');
+    await f.request('/admin/login', { admin: true, method: 'POST', data: { password }, expected: 404 });
+    await f.request('/admin/logout', { admin: true, method: 'POST', data: {}, expected: 404 });
+    await f.request('/admin/pairing', { admin: true, method: 'POST', data: {}, headers: { Origin: 'https://evil.example' }, expected: 403 });
+    await f.request('/admin/devices/' + deviceId, { admin: true, method: 'DELETE', headers: { 'Sec-Fetch-Site': 'cross-site' }, expected: 403 });
+    for (const path of ['/admin/status', '/admin/settings', '/admin/pairing']) await f.request(path, { expected: 404 });
+    await f.request('/v1/clipboard', { expected: 401 });
+    await f.request('/v1/pair', { method: 'POST', data: { code: 'invalid' }, expected: 403 });
+    await f.restart({ adminAuth: 'password' });
+    await f.request('/admin/settings', { admin: true, expected: 401, headers: { 'X-Umbrel-Authenticated': 'true' } });
+    await f.unlock();
+    assert.equal((await f.request('/admin/settings', { admin: true })).devices.length, 2);
+  } finally { await f.close(); }
+});
+
+test('fresh Umbrel dashboard opens without configuring a ClipSync password', async () => {
+  const f = await fixture({ adminAuth: 'umbrel', adminPassword: '' });
+  try {
+    assert.deepEqual(await f.request('/admin/status', { admin: true }), { configured: false, unlocked: true, authMode: 'umbrel' });
+    assert.deepEqual((await f.request('/admin/settings', { admin: true })).devices, []);
+  } finally { await f.close(); }
 });

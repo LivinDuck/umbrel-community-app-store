@@ -9,9 +9,9 @@ async function api(path, method = 'GET', data) {
 async function busy(button, work) { button.disabled = true; try { await work(); } catch (e) { notice(e.message); } finally { button.disabled = false; } }
 async function refresh() {
   const state = await api('/admin/status');
-  $('login').hidden = state.unlocked; $('settings').hidden = !state.unlocked; $('logout').hidden = !state.unlocked;
+  $('login').hidden = state.unlocked; $('settings').hidden = !state.unlocked; $('logout').hidden = !state.unlocked || state.authMode === 'umbrel';
   $('login-title').textContent = state.configured ? 'Unlock server settings' : 'Set a server settings password';
-  $('login-help').textContent = state.configured ? 'Use the app password shown by Umbrel, or the password you chose during setup. Devices pair without accounts.' : 'Choose at least 12 characters to protect these settings. Your devices will use one-time codes, not this password.';
+  $('login-help').textContent = state.configured ? 'Use the server password you chose during setup. Devices pair without accounts.' : 'Choose at least 12 characters to protect these settings. Your devices will use one-time codes, not this password.';
   if (!state.unlocked) return;
   const settings = await api('/admin/settings');
   $('url').value = settings.publicUrl;

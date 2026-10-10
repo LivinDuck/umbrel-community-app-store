@@ -55,6 +55,8 @@ export function caddyConfig(settings, upstream = 'server:3001') {
 }
 
 export async function createClipSync(options = {}) {
+  const adminAuth = options.adminAuth ?? process.env.ADMIN_AUTH ?? 'password';
+  if (!['password', 'umbrel'].includes(adminAuth)) throw new Error('ADMIN_AUTH must be password or umbrel');
   const dataDir = options.dataDir ?? process.env.DATA_DIR ?? './data';
   mkdirSync(dataDir, { recursive: true, mode: 0o700 });
   const db = new DatabaseSync(join(dataDir, 'clipsync.sqlite'));
@@ -103,6 +105,9 @@ export async function createClipSync(options = {}) {
     return result;
   }
   function admin(req) {
+    // Explicit deployment setting: the private dashboard is behind Umbrel app_proxy.
+    // This never changes authentication on the separate native/WAN listener.
+    if (adminAuth === 'umbrel') return;
     const token = req.headers.cookie?.match(/(?:^|;\s*)clipsync_session=([A-Za-z0-9_-]+)/)?.[1];
     if (!token || (sessions.get(hash(token)) ?? 0) < now()) throw fail(401, 'Unlock the server settings first');
   }
@@ -201,8 +206,9 @@ export async function createClipSync(options = {}) {
       }
       if (req.method === 'GET' && path === '/admin/status') {
         let unlocked = false; try { admin(req); unlocked = true; } catch {}
-        return json(res, 200, { configured: configured(), unlocked });
+        return json(res, 200, { configured: configured(), unlocked, authMode: adminAuth });
       }
+      if (adminAuth === 'umbrel' && ['/admin/login', '/admin/logout'].includes(path)) throw fail(404, 'Use Umbrel to manage your session');
       if (req.method === 'POST' && path === '/admin/login') {
         limited(req, 'login', 8);
         const input = await body(req, 4096);
