@@ -3,6 +3,7 @@ import json
 import os
 from pathlib import Path
 import secrets
+import shutil
 import subprocess
 import tempfile
 import time
@@ -21,7 +22,10 @@ password = secrets.token_urlsafe(24)
 
 
 def docker(*args, check=True):
-    return subprocess.run(['docker', *args], check=check, text=True, capture_output=True).stdout.strip()
+    result = subprocess.run(['docker', *args], text=True, capture_output=True)
+    if check and result.returncode:
+        raise AssertionError(f'Docker {args[0]} failed: {result.stderr}')
+    return result.stdout.strip()
 
 
 def request(base, path, data=None, method=None, cookie=None, token=None, expected=200):
@@ -72,7 +76,7 @@ def pair(web, api, cookie, device):
 
 try:
     docker('network', 'create', name)
-    with tempfile.TemporaryDirectory(prefix='clipsync-ci-') as tmp:
+    with tempfile.TemporaryDirectory(prefix='clipsync-ci-', ignore_cleanup_errors=True) as tmp:
         data = Path(tmp) / 'data'
         data.mkdir()
         subprocess.run(['sudo', 'chown', '1000:1000', str(data)], check=True)
@@ -97,7 +101,7 @@ try:
         assert json.loads(ws.recv())['item'] == item
         ws.close()
         # Validate the actual DNS-only TLS config without obtaining certificates or contacting DNS.
-        code = "import {caddyConfig} from './src/server.js'; console.log(JSON.stringify(caddyConfig({publicUrl:'https://sync.example.com:39443',cloudflareToken:'test-token-never-used'})))"
+        code = "import {caddyConfig} from './src/server.js'; console.log(JSON.stringify(caddyConfig({publicUrl:'https://sync.example.com:39443',cloudflareToken:'a'.repeat(40)})))"
         config = docker('exec', '-w', '/app', name, 'node', '--input-type=module', '-e', code)
         path = Path(tmp) / 'caddy-test.json'
         path.write_text(config)
@@ -120,3 +124,6 @@ try:
 finally:
     docker('rm', '-f', name, name + '-tls', check=False)
     docker('network', 'rm', name, check=False)
+    if 'tmp' in globals() and Path(tmp).exists():
+        subprocess.run(['sudo', 'chown', '-R', f'{os.getuid()}:{os.getgid()}', tmp], check=True)
+        shutil.rmtree(tmp)
