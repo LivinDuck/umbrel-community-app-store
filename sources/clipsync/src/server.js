@@ -177,6 +177,7 @@ export async function createClipSync(options = {}) {
     try {
       const path = new URL(req.url, 'http://local').pathname;
       checkOrigin(req);
+      if (req.method === 'GET' && path === '/favicon.ico') { res.writeHead(204); return res.end(); }
       if (req.method === 'GET' && ['/','/app.js','/style.css'].includes(path)) {
         const file = path === '/' ? 'index.html' : path.slice(1);
         res.writeHead(200, { 'Content-Type': file.endsWith('.html') ? 'text/html; charset=utf-8' : file.endsWith('.js') ? 'text/javascript' : 'text/css',
