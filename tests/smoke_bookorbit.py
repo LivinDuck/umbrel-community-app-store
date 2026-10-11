@@ -49,7 +49,7 @@ def main():
                 if status==200 and not data['needsSetup']: break
                 time.sleep(2)
             else: raise AssertionError('bootstrap did not complete')
-            password=(work/'data/onboarding/admin-password.txt').read_text().strip()
+            password=compose('exec','-T','setup','cat','/onboarding/admin-password.txt',capture=True).stdout.strip()
             status, login=api('/auth/login',{'username':'admin','password':password})
             assert status in (200,201), ('login',status)
             token=login['accessToken']
@@ -68,7 +68,7 @@ def main():
             deadline=time.monotonic()+90
             while time.monotonic()<deadline:
                 status,books=api(f'/libraries/{library_id}/books',body,token)
-                if status==200 and 'Original Smoke Book' in json.dumps(books): break
+                if status in (200,201) and 'Original Smoke Book' in json.dumps(books): break
                 time.sleep(2)
             else: raise AssertionError('ebook scan failed')
             compose('up','-d','--force-recreate','--wait','--wait-timeout','240','server')
