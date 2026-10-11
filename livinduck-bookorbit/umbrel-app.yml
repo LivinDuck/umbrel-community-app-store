@@ -1,0 +1,47 @@
+manifestVersion: 1
+id: livinduck-bookorbit
+storage:
+  dataRoot: data
+folderAccess:
+- id: books
+  name: Books
+  note: Choose your ebook library. BookOrbit reads it at /books.
+  mounts:
+  - service: server
+    targetPath: /books
+    readOnly: false
+category: media
+name: BookOrbit
+version: 3.3.0
+tagline: Read, organize and sync your ebook library
+description: 'BookOrbit organizes ebooks, comics and audiobooks with a browser reader, folder
+  watching, OPDS catalogs, and Kobo and KOReader integrations.
+
+
+  The administrator username is admin. Your unique initial password is saved in the app data
+  folder at onboarding/admin-password.txt (accessible through Umbrel Files). Change it after
+  signing in. The setup service never resets an existing account.
+
+
+  Choose a folder in Umbrel app settings, then create a library pointing to /books and enable
+  folder watching. OPDS clients can connect to /api/v1/opds using a dedicated OPDS account created
+  in BookOrbit. Umbrel login protects the browser; BookOrbit authentication protects client
+  endpoints.
+
+
+  Kobo and KOReader device configuration is performed separately. Back up both application data
+  and PostgreSQL together.'
+releaseNotes: ''
+developer: BookOrbit contributors
+website: https://bookorbit.app
+dependencies: []
+repo: https://github.com/bookorbit/bookorbit
+support: https://github.com/LivinDuck/umbrel-community-app-store/issues
+port: 39405
+gallery: []
+path: ''
+defaultUsername: admin
+defaultPassword: ''
+submitter: LivinDuck
+submission: https://github.com/LivinDuck/umbrel-community-app-store
+icon: https://raw.githubusercontent.com/LivinDuck/umbrel-community-app-store/main/livinduck-bookorbit/icon.svg

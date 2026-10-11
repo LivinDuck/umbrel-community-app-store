@@ -1,0 +1,8 @@
+export APP_LIVINDUCK_BOOKORBIT_POSTGRES_PASSWORD="$(derive_entropy "${app_entropy_identifier}-postgres-password")"
+export APP_LIVINDUCK_BOOKORBIT_JWT_SECRET="$(derive_entropy "${app_entropy_identifier}-jwt-secret")"
+export APP_LIVINDUCK_BOOKORBIT_SETUP_TOKEN="$(derive_entropy "${app_entropy_identifier}-setup-token")"
+export APP_LIVINDUCK_BOOKORBIT_PODCAST_KEY="$(derive_entropy "${app_entropy_identifier}-podcast-key")"
+export APP_LIVINDUCK_BOOKORBIT_EMAIL_KEY="$(derive_entropy "${app_entropy_identifier}-email-key")"
+export APP_LIVINDUCK_BOOKORBIT_MIGRATION_KEY="$(derive_entropy "${app_entropy_identifier}-migration-key")"
+export APP_LIVINDUCK_BOOKORBIT_BOOK_REQUEST_KEY="$(derive_entropy "${app_entropy_identifier}-book-request-key")"
+export APP_LIVINDUCK_BOOKORBIT_ADMIN_PASSWORD="$(derive_entropy "${app_entropy_identifier}-admin-password")"
