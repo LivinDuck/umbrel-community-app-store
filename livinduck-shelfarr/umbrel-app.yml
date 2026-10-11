@@ -1,0 +1,65 @@
+manifestVersion: 1
+id: livinduck-shelfarr
+storage:
+  dataRoot: data
+folderAccess:
+  - id: audiobooks
+    name: Audiobooks
+    note: Choose your audiobook library. Shelfarr writes completed books to /audiobooks.
+    mounts:
+      - service: server
+        targetPath: /audiobooks
+        readOnly: false
+  - id: ebooks
+    name: Ebooks
+    note: Choose your ebook library. Shelfarr writes completed books to /ebooks.
+    mounts:
+      - service: server
+        targetPath: /ebooks
+        readOnly: false
+  - id: umbrel-downloads
+    name: Downloads
+    note: Select your download client's completed folder, available inside Shelfarr at /downloads.
+    mounts:
+      - service: server
+        targetPath: /downloads
+        readOnly: false
+category: media
+name: Shelfarr
+version: "2026.10.05.1"
+tagline: Request and organize ebooks and audiobooks
+description: >-
+  Open Shelfarr and create your administrator account, then configure your
+  preferred book sources and optional download services in Settings.
+
+
+  Discover books, collect requests, and automate downloads into your ebook and
+  audiobook libraries. Connect optional services such as Audiobookshelf,
+  Prowlarr, and your download client using their addresses and credentials.
+  These services are configured separately and are not required to open Shelfarr.
+
+
+  Completed books are stored in /audiobooks and /ebooks. Umbrel's shared Downloads
+  folder is available at /downloads. On umbrelOS 2.0, select existing library
+  folders in the app's folder settings to share them with Audiobookshelf.
+
+
+  The optional Audible Backup integration includes the Libation companion.
+  It stays idle until enabled and connected to your Audible account in Shelfarr.
+  Umbrel login protects the web interface, and Shelfarr has its own account login.
+releaseNotes: ""
+developer: Pedro Revez Silva and contributors
+website: https://shelfarr.org
+dependencies: []
+repo: https://github.com/Pedro-Revez-Silva/shelfarr
+support: https://github.com/LivinDuck/umbrel-community-app-store/issues
+port: 39404
+gallery: []
+path: ""
+defaultUsername: ""
+defaultPassword: ""
+submitter: LivinDuck
+submission: https://github.com/LivinDuck/umbrel-community-app-store
+icon: https://raw.githubusercontent.com/LivinDuck/umbrel-community-app-store/main/livinduck-shelfarr/icon.svg
+permissions:
+  - STORAGE_DOWNLOADS
