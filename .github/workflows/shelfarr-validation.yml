@@ -29,3 +29,9 @@ jobs:
       - run: python -m pip install PyYAML==6.0.2 requests==2.32.5
       - name: Check onboarding, authentication, companion and persistence
         run: python -u tests/smoke_shelfarr.py
+      - name: Check custom backend behavior in isolated containers
+        run: |
+          IMAGE=$(python -c "import yaml; print(yaml.safe_load(open('livinduck-shelfarr/docker-compose.yml'))['services']['server']['image'])")
+          for extension in orbit torbox-cache; do
+            docker run --rm --network none --tmpfs /rails/storage:rw,uid=1000,gid=1000 "$IMAGE" ./bin/rails runner "/rails/config/initializers/umbrel_google_books/$extension/test_backend.txt"
+          done

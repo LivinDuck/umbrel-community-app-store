@@ -26,9 +26,13 @@ folderAccess:
         readOnly: false
 category: media
 name: Shelfarr
-version: "2026.10.05.1"
+version: "2026.10.05.1-patch.1"
 tagline: Request and organize ebooks and audiobooks
 description: >-
+  This custom edition uses BookOrbit for search. Install and configure BookOrbit
+  and its integration credentials as described in the package README.
+
+
   Open Shelfarr and create your administrator account, then configure your
   preferred book sources and optional download services in Settings.
 
@@ -47,10 +51,16 @@ description: >-
   The optional Audible Backup integration includes the Libation companion.
   It stays idle until enabled and connected to your Audible account in Shelfarr.
   Umbrel login protects the web interface, and Shelfarr has its own account login.
-releaseNotes: ""
+releaseNotes: >-
+  Includes the custom BookOrbit search interface, provider resilience, request
+  queue fixes and TorBox audiobook cache preference directly in the image.
+  Reinstalls retain the custom software. Accounts, credentials and library state
+  still require a private backup and restore. See the package README for setup
+  and migration from the previous manually mounted extensions.
 developer: Pedro Revez Silva and contributors
 website: https://shelfarr.org
-dependencies: []
+dependencies:
+  - livinduck-bookorbit
 repo: https://github.com/Pedro-Revez-Silva/shelfarr
 support: https://github.com/LivinDuck/umbrel-community-app-store/issues
 port: 39404

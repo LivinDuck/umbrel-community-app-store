@@ -97,6 +97,23 @@ with tempfile.TemporaryDirectory(prefix=project) as temporary:
         response.raise_for_status()
         assert '/admin/settings' in response.url, 'Registration did not create administrator'
         assert browser.cookies.get('session_id'), 'Missing authenticated session'
+        rails('raise unless Book.column_names.include?("bookorbit_id"); '
+              'raise unless Book.column_names.include?("bookorbit_metadata"); '
+              'raise unless SearchJob.enqueue_after_transaction_commit')
+        response = browser.get(base + '/search', timeout=30)
+        response.raise_for_status()
+        assert '/search/orbit/app.js' in response.text, 'Custom search UI is missing'
+        response = browser.get(base + '/search/orbit/app.js', timeout=30)
+        response.raise_for_status()
+        assert len(response.content) > 10000, 'Custom search assets missing'
+        response = browser.get(base + '/search/orbit/source', timeout=30)
+        response.raise_for_status()
+        import io, tarfile
+        with tarfile.open(fileobj=io.BytesIO(response.content), mode='r:gz') as archive:
+            names = archive.getnames()
+            assert 'orbit_search.rb' in names and 'LICENSE-BookOrbit' in names
+            assert not any('credentials.json' in name or 'node_modules' in name for name in names)
+
         anonymous = requests.Session()
         anonymous.headers.update(browser.headers)
         response = anonymous.get(base + '/admin/settings', timeout=30)

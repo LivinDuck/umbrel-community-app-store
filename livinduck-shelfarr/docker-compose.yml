@@ -7,7 +7,7 @@ services:
       APP_PORT: 80
 
   server:
-    image: ghcr.io/pedro-revez-silva/shelfarr:2026.10.05.1@sha256:b4bbdf278cfe6aa4773b102c192ad9c79263c573fc8b51c5861d1a093f9e9092
+    image: ghcr.io/livinduck/shelfarr:2026.10.05.1-custom-d2adba0799937cfebe0d3762eac3410897e540b9@sha256:c80d1020448318f0f7672f680b844e544eaedbbf06c933088d340aa18773ec14
     restart: on-failure
     init: true
     stop_grace_period: 1m
