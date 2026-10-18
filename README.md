@@ -10,7 +10,7 @@ In Umbrel, open **App Store → menu → Community App Stores**, then add:
 https://github.com/LivinDuck/umbrel-community-app-store
 ```
 
-Find **rmfakecloud**, **Kasm Workspaces**, **DiscoPanel**, **ClipSync**, or **Shelfarr** in the LivinDuck store. Adding the store does not install
+Find **rmfakecloud**, **Kasm Workspaces**, **DiscoPanel**, **ClipSync**, **Shelfarr**, or **Murmur Web** in the LivinDuck store. Adding the store does not install
 the app. Install it when you are ready.
 
 | App | Version | Setup |
@@ -20,6 +20,7 @@ the app. Install it when you are ready.
 | DiscoPanel | 2.0.15 | [Setup and limitations](livinduck-discopanel/README.md) |
 | ClipSync | 1.0.2 | [Pairing and dedicated-port HTTPS setup](livinduck-clipsync/README.md) |
 | Shelfarr | 2026.10.05.1 | [Setup and library folders](livinduck-shelfarr/README.md) |
+| Murmur Web | 0.5.1 | [Connect to the existing Hermes Agent app](livinduck-murmur-web/README.md) |
 
 ## Packaging workflow
 
@@ -35,6 +36,7 @@ Updates repeat the same review, including data migrations and backup/recovery.
 No automatic installation or upstream version bumping is configured.
 
 The `Validate apps` workflow uses a pinned revision of Umbrel's package linter
+with the official catalog available for dependency and port-conflict checks,
 and runs disposable rmfakecloud, Kasm and DiscoPanel container tests on GitHub-hosted runners.
 It never connects to the NAS. Actual Umbrel installation and physical tablet
 sync remain untested until explicitly performed. Kasm checks exercise installation, login and storage; desktop streaming remains
@@ -48,3 +50,6 @@ ClipSync server sources live in `sources/clipsync/`. Its separate image workflow
 
 **Validate Shelfarr** tests setup, account authentication, the optional Libation companion,
 and storage persistence in disposable AMD64 and ARM64 containers.
+
+**Validate Murmur Web** tests web-only operation, external Hermes API connectivity
+using a disposable fixture, origin checks and settings persistence on AMD64 and ARM64.

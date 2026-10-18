@@ -1,0 +1,24 @@
+version: "3.7"
+
+services:
+  app_proxy:
+    environment:
+      APP_HOST: livinduck-murmur-web_web_1
+      APP_PORT: 3000
+      # Only home-screen assets bypass Umbrel login; the app and API stay protected.
+      PROXY_AUTH_WHITELIST: "/manifest.webmanifest,/favicon.svg,/icon.svg,/icon-192.png,/icon-512.png,/icon-maskable-512.png,/apple-touch-icon.png"
+
+  web:
+    image: ghcr.io/getumbrel/murmur:v0.5.1@sha256:7a2cea6e1dc0f5a37127f367a9c278586cb1b047557a258e4082a3d78fc3b732
+    user: "1000:1000"
+    init: true
+    restart: on-failure
+    volumes:
+      - ${APP_DATA_DIR}/data/murmur:/data
+    environment:
+      # Uses the separate Hermes Agent app on Umbrel's shared app network.
+      # No bundled Hermes service or MURMUR_BUILTIN_HERMES_* configuration.
+      HERMES_URL: "http://hermes-agent_web_1:18789"
+      MURMUR_FIND_HERMES: "Hermes Agent=http://hermes-agent_web_1:18789"
+      # Safe here because the web service is only exposed through Umbrel login.
+      MURMUR_ALLOWED_HOSTS: "*"

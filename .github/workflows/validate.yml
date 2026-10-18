@@ -20,7 +20,8 @@ jobs:
           node-version: '22'
       - run: npm ci --prefix .validation/umbrel-apps --ignore-scripts --no-audit --no-fund
       - name: Validate packages and public multi-architecture images
-        run: node .validation/umbrel-apps/.tools/lint-apps.mjs --root "$GITHUB_WORKSPACE" --all --check-images
+        # Include official apps when resolving cross-store dependencies and ports.
+        run: python3 tests/lint_store.py .validation/umbrel-apps
       - run: git diff --check
   rmfakecloud:
     strategy:

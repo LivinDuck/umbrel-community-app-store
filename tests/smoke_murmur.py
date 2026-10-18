@@ -1,0 +1,168 @@
+#!/usr/bin/env python3
+"""Run the packaged Murmur image against a disposable Hermes protocol fixture."""
+import json
+import os
+from pathlib import Path
+import secrets
+import subprocess
+import tempfile
+import time
+import urllib.error
+import urllib.request
+
+import yaml
+
+ROOT = Path(__file__).resolve().parents[1]
+APP = ROOT / 'livinduck-murmur-web'
+
+# This fixture checks that Murmur obtains the upstream session token server-side
+# and supplies it to API requests; it does not simulate agents or model calls.
+FIXTURE = r"""
+const http = require('node:http');
+const token = 'fixture-session-' + require('node:crypto').randomBytes(16).toString('hex');
+http.createServer((req, res) => {
+  const path = new URL(req.url, 'http://fixture').pathname;
+  if (path === '/') {
+    res.setHeader('Content-Type', 'text/html');
+    return res.end('<script>window.__HERMES_SESSION_TOKEN__ = "' + token + '";</script>');
+  }
+  res.setHeader('Content-Type', 'application/json');
+  if (path === '/api/status') return res.end(JSON.stringify({
+    version: '2026.9.24', auth_required: false, install_id: 'murmur-ci-fixture'
+  }));
+  if (req.headers['x-hermes-session-token'] !== token) {
+    res.statusCode = 401;
+    return res.end('{"error":"unauthorized"}');
+  }
+  if (path === '/api/sessions') return res.end('{"sessions":[{"id":"existing-chat","title":"Existing Hermes conversation"}]}');
+  res.end('{}');
+}).listen(18789, '0.0.0.0');
+"""
+
+
+def main():
+    package = yaml.safe_load((APP / 'docker-compose.yml').read_text())
+    manifest = yaml.safe_load((APP / 'umbrel-app.yml').read_text())
+    assert set(package['services']) == {'app_proxy', 'web'}
+    assert manifest['dependencies'] == ['hermes-agent']
+    proxy = package['services'].pop('app_proxy')['environment']
+    assert proxy['APP_HOST'] == manifest['id'] + '_web_1'
+    assert proxy.get('PROXY_AUTH_ADD') != 'false'
+    assert all(path.endswith(('.png', '.svg', '.webmanifest'))
+               for path in proxy['PROXY_AUTH_WHITELIST'].split(','))
+    web = package['services']['web']
+    assert 'ports' not in web and 'network_mode' not in web
+    assert not any(key.startswith('MURMUR_BUILTIN_HERMES_') for key in web['environment'])
+    assert web['environment']['HERMES_URL'] == 'http://hermes-agent_web_1:18789'
+    package.pop('version', None)
+
+    with tempfile.TemporaryDirectory(prefix='murmur-smoke-') as tmp:
+        work = Path(tmp)
+        data = work / 'data/murmur'
+        data.mkdir(parents=True)
+        # Emulate Umbrel's uid 1000 app data ownership, not world-writable state.
+        subprocess.run(['sudo', 'chown', '-R', '1000:1000', str(data)], check=True)
+        fixture = work / 'fixture.cjs'
+        fixture.write_text(FIXTURE)
+        web['ports'] = ['127.0.0.1::3000']
+        package['services']['hermes-fixture'] = {
+            'image': web['image'],
+            'command': ['node', '/fixture.cjs'],
+            'volumes': [str(fixture) + ':/fixture.cjs:ro'],
+            'networks': {'default': {'aliases': ['hermes-agent_web_1']}},
+            'healthcheck': {'disable': True},
+        }
+        file = work / 'compose.yml'
+        file.write_text(yaml.safe_dump(package, sort_keys=False))
+        env = dict(os.environ, APP_DATA_DIR=tmp)
+        project = 'murmur-smoke-' + secrets.token_hex(4)
+
+        def compose(*args, capture=False):
+            return subprocess.run(
+                ['docker', 'compose', '-p', project, '-f', str(file), *args],
+                env=env, check=True, text=True, capture_output=capture)
+
+        base = ''
+
+        def request(path, body=None, method=None, origin=None):
+            headers = {'Content-Type': 'application/json', 'Origin': origin or base}
+            req = urllib.request.Request(
+                base + path, headers=headers, method=method,
+                data=json.dumps(body).encode() if body is not None else None)
+            try:
+                with urllib.request.urlopen(req, timeout=20) as response:
+                    return response.status, response.read().decode()
+            except urllib.error.HTTPError as error:
+                return error.code, error.read().decode()
+
+        def ready():
+            nonlocal base
+            port = compose('port', 'web', '3000', capture=True).stdout.strip().rsplit(':', 1)[1]
+            base = 'http://127.0.0.1:' + port
+            for attempt in range(30):
+                try:
+                    code, body = request('/murmur/connection')
+                    if code == 200 and json.loads(body)['status'] == 'connected':
+                        return json.loads(body)
+                except (OSError, ValueError):
+                    pass
+                time.sleep(2)
+            raise AssertionError('Murmur could not connect to the external Hermes fixture')
+
+        def saved_settings():
+            return json.loads(compose('exec', '-T', 'web', 'node', '-e',
+                "process.stdout.write(require('node:fs').readFileSync('/data/murmur.json'))",
+                capture=True).stdout)
+
+        try:
+            compose('up', '-d', '--wait', '--wait-timeout', '120')
+            connected = ready()
+            assert connected['source'] == 'env'
+            assert connected['url'] == web['environment']['HERMES_URL']
+            assert 'fixture-session-' not in json.dumps(connected)
+            code, html = request('/')
+            assert code == 200 and '<html' in html and '/assets/' in html
+            code, body = request('/murmur/setup')
+            setup = json.loads(body)
+            assert code == 200 and setup['decided'] and setup['builtin'] is None
+            code, body = request('/hermes/api/sessions')
+            assert code == 200 and 'existing-chat' in body
+            assert 'fixture-session-' not in body
+            assert request('/hermes/api/sessions', origin='https://untrusted.example')[0] == 403
+            assert request('/murmur/connections/env', {'name': 'Untrusted'}, 'PATCH',
+                           origin='https://untrusted.example')[0] == 403
+            assert request('/murmur/connections/env', {'name': 'My existing Hermes'}, 'PATCH')[0] == 200
+            assert request('/murmur/connections/env', method='DELETE')[0] == 409
+            settings = saved_settings()
+            assert settings['managedName'] == 'My existing Hermes'
+            mode = compose('exec', '-T', 'web', 'node', '-e',
+                "console.log(require('node:fs').statSync('/data/murmur.json').mode & 0o777)",
+                capture=True).stdout.strip()
+            assert int(mode) == 0o600
+
+            compose('restart', 'web')
+            assert ready()['name'] == 'My existing Hermes'
+            compose('up', '-d', '--force-recreate', '--wait', '--wait-timeout', '120', 'web')
+            assert ready()['name'] == 'My existing Hermes'
+            assert saved_settings() == settings
+
+            # Hermes restarts rotate its token. Murmur must recover without storing it.
+            compose('restart', 'hermes-fixture')
+            for attempt in range(30):
+                code, body = request('/hermes/api/sessions')
+                if code == 200 and 'existing-chat' in body:
+                    break
+                time.sleep(2)
+            else:
+                raise AssertionError('Hermes token refresh failed after restart')
+            print('PASS: web UI, external Hermes, no built-in, token auth, origin checks, persistence and reconnect')
+        except Exception:
+            compose('logs', '--tail', '80')
+            raise
+        finally:
+            compose('down', '--volumes', '--remove-orphans')
+            subprocess.run(['sudo', 'rm', '-rf', str(work / 'data')], check=True)
+
+
+if __name__ == '__main__':
+    main()
