@@ -4,12 +4,12 @@ storage:
   dataRoot: data
 category: ai
 name: Murmur Web
-version: "0.5.1"
+version: "0.5.1-patch.1"
 tagline: A web interface for your existing Hermes agents
 description: >-
   Murmur's web interface without a bundled Hermes instance. Requires the separate
-  Hermes Agent app on Umbrel and connects to it automatically. Set up your model
-  in Hermes Agent first, then open Murmur Web to use your existing agents and chats.
+  Hermes Agent app on Umbrel. On first open, choose your Hermes server and enter
+  its username and password if required. The local Hermes Agent is suggested.
 
 
   Chat with individual agents or groups, follow streaming replies, and manage
@@ -24,8 +24,11 @@ description: >-
 
   This is a separate community package. It does not import data from the official
   Murmur app's bundled Hermes. Additional remote Hermes servers can be added in
-  Settings, but the local Hermes Agent connection is fixed by this package.
-releaseNotes: ""
+  Settings. Saved connections and their credentials can be edited there.
+releaseNotes: >-
+  Restores server selection and sign-in by removing the fixed Hermes connection.
+  Choose a server on first open, or manage connections in Settings → Server.
+  Existing saved connections are preserved. No bundled Hermes is installed.
 developer: Umbrel
 website: https://github.com/getumbrel/murmur
 dependencies:

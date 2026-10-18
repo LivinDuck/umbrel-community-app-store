@@ -16,9 +16,8 @@ services:
     volumes:
       - ${APP_DATA_DIR}/data/murmur:/data
     environment:
-      # Uses the separate Hermes Agent app on Umbrel's shared app network.
+      # Suggest the local app, but let users choose a server and enter credentials.
       # No bundled Hermes service or MURMUR_BUILTIN_HERMES_* configuration.
-      HERMES_URL: "http://hermes-agent_web_1:18789"
       MURMUR_FIND_HERMES: "Hermes Agent=http://hermes-agent_web_1:18789"
       # Safe here because the web service is only exposed through Umbrel login.
       MURMUR_ALLOWED_HOSTS: "*"

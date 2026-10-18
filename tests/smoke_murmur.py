@@ -15,22 +15,32 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 APP = ROOT / 'livinduck-murmur-web'
 
-# This fixture checks that Murmur obtains the upstream session token server-side
-# and supplies it to API requests; it does not simulate agents or model calls.
+# Test both dashboard token and password sign-in; no agents or model calls.
 FIXTURE = r"""
 const http = require('node:http');
 const token = 'fixture-session-' + require('node:crypto').randomBytes(16).toString('hex');
-http.createServer((req, res) => {
+const gated = process.env.FIXTURE_AUTH === 'password';
+http.createServer(async (req, res) => {
   const path = new URL(req.url, 'http://fixture').pathname;
   if (path === '/') {
     res.setHeader('Content-Type', 'text/html');
-    return res.end('<script>window.__HERMES_SESSION_TOKEN__ = "' + token + '";</script>');
+    return res.end(gated ? '<script>window.__HERMES_AUTH_REQUIRED__ = true;</script>' : '<script>window.__HERMES_SESSION_TOKEN__ = "' + token + '";</script>');
   }
   res.setHeader('Content-Type', 'application/json');
   if (path === '/api/status') return res.end(JSON.stringify({
-    version: '2026.9.24', auth_required: false, install_id: 'murmur-ci-fixture'
+    version: '2026.9.24', auth_required: gated, install_id: 'murmur-ci-fixture'
   }));
-  if (req.headers['x-hermes-session-token'] !== token) {
+  if (path === '/api/auth/providers') return res.end('{"providers":[{"name":"basic","supports_password":true}]}');
+  if (path === '/auth/password-login') {
+    let raw = ''; for await (const chunk of req) raw += chunk;
+    const body = JSON.parse(raw);
+    if (body.username !== 'fixture-user' || body.password !== 'fixture-password') {
+      res.statusCode = 401; return res.end('{}');
+    }
+    res.setHeader('Set-Cookie', 'hermes_session_at=' + token + '; Path=/; Max-Age=900; HttpOnly');
+    return res.end('{}');
+  }
+  if (gated ? req.headers.authorization !== 'Bearer ' + token : req.headers['x-hermes-session-token'] !== token) {
     res.statusCode = 401;
     return res.end('{"error":"unauthorized"}');
   }
@@ -40,7 +50,7 @@ http.createServer((req, res) => {
 """
 
 
-def main():
+def main(auth):
     package = yaml.safe_load((APP / 'docker-compose.yml').read_text())
     manifest = yaml.safe_load((APP / 'umbrel-app.yml').read_text())
     assert set(package['services']) == {'app_proxy', 'web'}
@@ -53,7 +63,8 @@ def main():
     web = package['services']['web']
     assert 'ports' not in web and 'network_mode' not in web
     assert not any(key.startswith('MURMUR_BUILTIN_HERMES_') for key in web['environment'])
-    assert web['environment']['HERMES_URL'] == 'http://hermes-agent_web_1:18789'
+    assert 'HERMES_URL' not in web['environment']
+    hermes_url = 'http://hermes-agent_web_1:18789'
     package.pop('version', None)
 
     with tempfile.TemporaryDirectory(prefix='murmur-smoke-') as tmp:
@@ -69,6 +80,7 @@ def main():
             'image': web['image'],
             'init': True,
             'command': ['node', '/fixture.cjs'],
+            'environment': {'FIXTURE_AUTH': auth},
             'volumes': [str(fixture) + ':/fixture.cjs:ro'],
             'networks': {'default': {'aliases': ['hermes-agent_web_1']}},
             'healthcheck': {
@@ -119,10 +131,33 @@ def main():
                 capture=True).stdout)
 
         try:
+            # Password case also exercises an update from the original fixed URL.
+            if auth == 'password':
+                web['environment']['HERMES_URL'] = hermes_url
+                file.write_text(yaml.safe_dump(package, sort_keys=False))
+                compose('up', '-d', '--wait', '--wait-timeout', '120')
+                assert saved_settings()['setupSeen']
+                del web['environment']['HERMES_URL']
+                file.write_text(yaml.safe_dump(package, sort_keys=False))
             compose('up', '-d', '--wait', '--wait-timeout', '120')
+            port = compose('port', 'web', '3000', capture=True).stdout.strip().rsplit(':', 1)[1]
+            base = 'http://127.0.0.1:' + port
+            code, body = request('/murmur/setup')
+            setup = json.loads(body)
+            assert code == 200 and not setup['decided'] and setup['builtin'] is None, setup
+            found = next(item for item in setup['found'] if item['url'] == hermes_url)
+            credentials = {'username': 'fixture-user', 'password': 'fixture-password'} if auth == 'password' else {}
+            if auth == 'password':
+                assert found['needsSignIn']
+                assert request('/murmur/setup', {'use': 'found', 'id': found['id']})[0] == 422
+                assert request('/murmur/setup', {'use': 'found', 'id': found['id'], 'username': 'fixture-user', 'password': 'wrong'})[0] == 422
+                assert not json.loads(request('/murmur/setup')[1])['decided']
+            code, body = request('/murmur/setup', {'use': 'found', 'id': found['id'], **credentials})
+            assert code == 200, body
             connected = ready()
-            assert connected['source'] == 'env'
-            assert connected['url'] == web['environment']['HERMES_URL']
+            assert connected['source'] == 'saved' and not connected['managed']
+            connection_path = '/murmur/connections/' + connected['id']
+            assert connected['url'] == hermes_url
             assert 'fixture-session-' not in json.dumps(connected)
             code, html = request('/')
             assert code == 200 and '<html' in html and '/assets/' in html
@@ -133,12 +168,12 @@ def main():
             assert code == 200 and 'existing-chat' in body
             assert 'fixture-session-' not in body
             assert request('/hermes/api/sessions', origin='https://untrusted.example')[0] == 403
-            assert request('/murmur/connections/env', {'name': 'Untrusted'}, 'PATCH',
+            assert request(connection_path, {'name': 'Untrusted'}, 'PATCH',
                            origin='https://untrusted.example')[0] == 403
-            assert request('/murmur/connections/env', {'name': 'My existing Hermes'}, 'PATCH')[0] == 200
-            assert request('/murmur/connections/env', method='DELETE')[0] == 409
+            assert request(connection_path, {'url': hermes_url, **credentials}, 'PATCH')[0] == 200
+            assert request(connection_path, {'name': 'My existing Hermes'}, 'PATCH')[0] == 200
             settings = saved_settings()
-            assert settings['managedName'] == 'My existing Hermes'
+            assert settings['connections'][0]['name'] == 'My existing Hermes'
             mode = compose('exec', '-T', 'web', 'node', '-e',
                 "console.log(require('node:fs').statSync('/data/murmur.json').mode & 0o777)",
                 capture=True).stdout.strip()
@@ -159,7 +194,9 @@ def main():
                 time.sleep(2)
             else:
                 raise AssertionError('Hermes token refresh failed after restart')
-            print('PASS: web UI, external Hermes, no built-in, token auth, origin checks, persistence and reconnect')
+            assert request(connection_path, method='DELETE')[0] == 200
+            assert not json.loads(request('/murmur/setup')[1])['decided']
+            print(f'PASS ({auth}): server choice, sign-in, editable connection, persistence and reconnect')
         except Exception:
             compose('logs', '--tail', '80')
             raise
@@ -169,4 +206,5 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    for auth in ('token', 'password'):
+        main(auth)
