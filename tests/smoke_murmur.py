@@ -67,10 +67,14 @@ def main():
         web['ports'] = ['127.0.0.1::3000']
         package['services']['hermes-fixture'] = {
             'image': web['image'],
+            'init': True,
             'command': ['node', '/fixture.cjs'],
             'volumes': [str(fixture) + ':/fixture.cjs:ro'],
             'networks': {'default': {'aliases': ['hermes-agent_web_1']}},
-            'healthcheck': {'disable': True},
+            'healthcheck': {
+                'test': ['CMD', 'wget', '-qO-', 'http://127.0.0.1:18789/api/status'],
+                'interval': '2s', 'timeout': '2s', 'retries': 10,
+            },
         }
         file = work / 'compose.yml'
         file.write_text(yaml.safe_dump(package, sort_keys=False))
