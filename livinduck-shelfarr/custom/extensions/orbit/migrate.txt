@@ -1,0 +1,6 @@
+c = ActiveRecord::Base.connection
+c.add_column(:books,:bookorbit_id,:string) unless c.column_exists?(:books,:bookorbit_id)
+c.add_column(:books,:bookorbit_metadata,:text) unless c.column_exists?(:books,:bookorbit_metadata)
+c.add_index(:books,[:bookorbit_id,:book_type],unique:true,name:'index_books_on_bookorbit_and_type') unless c.index_exists?(:books,[:bookorbit_id,:book_type],name:'index_books_on_bookorbit_and_type')
+Book.reset_column_information
+puts 'RESULT '+{migration:'ok'}.to_json

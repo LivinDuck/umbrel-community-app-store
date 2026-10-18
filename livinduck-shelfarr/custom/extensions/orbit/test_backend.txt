@@ -1,0 +1,103 @@
+Rails.logger.level = Logger::FATAL
+load Rails.root.join('db/schema.rb')
+load File.join(OrbitSearch::ROOT,'migrate.txt')
+def assert(value, message)
+  raise message unless value
+end
+ActiveJob::Base.queue_adapter = :test
+Rails.cache = ActiveSupport::Cache::MemoryStore.new
+user = User.create!(name:'Test',username:'orbit_test',password:'Example-test-891Z',role: :admin)
+other = User.create!(name:'Other',username:'orbit_other',password:'Example-test-892Z')
+c = {'provider'=>'itunes','providerId'=>'1234','title'=>'The Three-Body Problem','authors'=>['Cixin Liu'],'coverUrl'=>'https://example.test/cover.jpg','isbn13'=>'9780765382030','publishedYear'=>2014,'language'=>'en','description'=>'Novel','narrators'=>['Luke Daniels']}
+token = OrbitSearch.store(user,c,'audiobook')
+assert(OrbitSearch.fetch(user,token)[:medium] == 'audiobook','format lost')
+begin
+ OrbitSearch.fetch(other,token);raise 'token crossed user boundary'
+rescue OrbitSearch::Error
+end
+assert(OrbitSearch.work_key(c,'audiobook')=='work:thethreebodyproblem:cixinliu:audiobook','work key differs')
+assert(OrbitSearch.work_key({'title'=>'三体','authors'=>['刘慈欣']},'ebook')=='work:三体:刘慈欣:ebook','CJK identity lost')
+assert(OrbitSearch.identity(c,'ebook')!=OrbitSearch.identity(c,'audiobook'),'medium identity collision')
+attrs=OrbitSearch.metadata(c,'audiobook')
+attrs[:orbit_payload]={'candidate'=>c,'metadata'=>attrs.dup,'isbn'=>c['isbn13'],'medium'=>'audiobook'}
+id='bookorbit:'+OrbitSearch.identity(c,'audiobook')
+SettingsService.set(:immediate_search_enabled, true)
+search_jobs = -> { SearchJob.queue_adapter.enqueued_jobs.select { |job| job[:job] == SearchJob } }
+result = nil
+Book.transaction do
+  Book.transaction(requires_new: true) do
+    result=RequestCreationService.call(user:user,work_id:id,book_types:['audiobook'],metadata_attrs:attrs,language:'en')
+    assert(search_jobs.call.empty?, 'search queued before inner transaction committed')
+  end
+  assert(search_jobs.call.empty?, 'search queued before outer transaction committed')
+end
+assert(search_jobs.call.size == 1, 'committed request must enqueue exactly one search')
+assert(search_jobs.call.first[:args] == [result.created_requests.first.id], 'wrong request queued')
+Book.transaction do
+  SearchJob.perform_later(result.created_requests.first.id)
+  raise ActiveRecord::Rollback
+end
+assert(search_jobs.call.size == 1, 'rolled-back transaction queued a search')
+SearchJob.perform_later(result.created_requests.first.id)
+assert(search_jobs.call.size == 2, 'search outside a transaction was not enqueued immediately')
+puts 'RESULT '+{search_enqueue_after_commit:true,nested_transaction:true,rollback_discards_job:true,non_transaction_enqueue:true}.to_json
+assert(result.success?,"creation failed: #{result.errors}")
+book=result.created_requests.first.book.reload
+assert(book.audiobook? && book.title==c['title'] && book.cover_url==c['coverUrl'],'metadata handoff failed')
+assert(book.isbn==c['isbn13'] && book.narrator=='Luke Daniels','edition metadata lost')
+assert(book.open_library_work_id.nil? && book.hardcover_id.nil?,'provider identity polluted')
+assert(Book.find_by_work_id(id,book_type:'audiobook')==book,'lookup failed')
+assert(Book.preload_by_work_ids([id])[id]['audiobook']==book,'preload failed')
+assert(BookMetadataLookupService.call([id])[:title]==c['title'],'backfill lookup failed')
+assert(OrbitSearch.existing(c,'audiobook')==book,'availability failed')
+assert(OrbitSearch.existing(c,'ebook').nil?,'format availability contaminated')
+duplicate=RequestCreationService.call(user:user,work_id:id,book_types:['audiobook'],metadata_attrs:attrs)
+assert(!duplicate.success?,'duplicate request created')
+legacy=Book.create!(title:'Dark Matter',author:'Blake Crouch',book_type:'ebook',hardcover_id:'456')
+assert(OrbitSearch.existing({'title'=>'Dark Matter','authors'=>['Blake Crouch']},'ebook')==legacy,'legacy match failed')
+assert(Book.find_by_work_id('hardcover:456',book_type:'ebook')==legacy,'old provider lookup broke')
+puts 'RESULT '+{passed:true,checks:14,requests:Request.count,queue_adapter:ActiveJob::Base.queue_adapter.class.name}.to_json
+require 'action_dispatch/testing/integration'
+require 'cgi'
+require 'stringio'
+class OrbitSearch::Client
+  def initialize; end
+  def get(path)
+    return [{'key'=>'itunes','label'=>'iTunes','coverPriority'=>1,'audioCoverPriority'=>2}] if path=='metadata-fetch/providers'
+    yield "data: #{ {'provider'=>'itunes','providerId'=>'999','title'=>'A Test Novel','authors'=>['Test Author'],'coverUrl'=>'https://example.test/test.jpg','isbn13'=>'9780441172719'}.to_json }\n\n"
+  end
+end
+app=ActionDispatch::Integration::Session.new(Rails.application)
+app.host! 'localhost'
+headers={'User-Agent'=>'Mozilla/5.0 Chrome/140.0.0.0 Safari/537.36'}
+app.get('/search/orbit/providers',headers:headers)
+assert(app.response.status==302,'anonymous search not protected')
+session=user.sessions.create!(user_agent:'integration test',ip_address:'127.0.0.1')
+env=ActionDispatch::Request.new(Rails.application.env_config.merge('rack.input'=>StringIO.new,'HTTP_HOST'=>'localhost','rack.url_scheme'=>'http'))
+jar=ActionDispatch::Cookies::CookieJar.build(env,{})
+jar.signed[:session_id]=session.id
+app.cookies[:session_id]=jar[:session_id]
+app.get('/search',headers:headers)
+assert(app.response.status==200,"search page failed: #{app.response.status} #{app.response.body.first(1000)}")
+assert(app.response.body.include?('id="orbit-search"') && !app.response.body.include?('<%'),'search page not rendered')
+csrf=Nokogiri::HTML(app.response.body).at_css('meta[name="csrf-token"]')&.[]('content')
+assert(csrf.present?,'csrf missing')
+headers=headers.merge('X-CSRF-Token'=>csrf,'HTTP_ORIGIN'=>'http://localhost')
+app.get('/search/orbit/providers',headers:headers)
+assert(app.response.status==200 && JSON.parse(app.response.body).first['key']=='itunes','provider endpoint failed')
+app.get('/search/orbit/stream?title=test&mediaKind=ebook',headers:headers)
+assert(app.response.status==200,"stream failed #{app.response.status}")
+fixture=JSON.parse(app.response.body.lines.find { |s| s.start_with?('data:') }.delete_prefix('data:'))
+assert(fixture['_token'].present?,'stream result missing token')
+app.post('/search/orbit/request',params:{token:fixture['_token'],tokens:[fixture['_token']],cover:'https://evil.test/cover'},headers:headers,as: :json)
+assert(app.response.status==422,'untrusted cover accepted')
+app.post('/search/orbit/request',params:{token:fixture['_token'],tokens:[fixture['_token']],cover:fixture['coverUrl'],isbn:fixture['isbn13'],language:'en'},headers:headers,as: :json)
+assert(app.response.status==200,"request endpoint failed #{app.response.status} #{app.response.body.first(2000)}")
+url=JSON.parse(app.response.body)['url']
+app.get(url,headers:headers)
+assert(app.response.status==200,'request detail broke')
+app.post('/search/orbit/availability',params:{tokens:[fixture['_token']]},headers:headers,as: :json)
+assert(JSON.parse(app.response.body).dig(fixture['_token'],'existingRequestId').present?,'availability missing existing request')
+app.post('/search/orbit/request',params:{token:fixture['_token']},headers:headers,as: :json)
+assert(app.response.status==422,'HTTP duplicate accepted')
+puts 'RESULT '+{http_tests:true,csrf_protected:true,stream:true,create_and_details:true,duplicate_block:true}.to_json

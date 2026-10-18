@@ -1,0 +1,129 @@
+# Run ONLY in a disposable network-isolated container with temporary storage.
+require 'minitest/autorun'
+require 'minitest/mock'
+Rails.logger.level = Logger::FATAL
+ActiveRecord::Schema.verbose = false
+load Rails.root.join('db/schema.rb')
+ActiveJob::Base.queue_adapter = :test
+Rails.cache = ActiveSupport::Cache::MemoryStore.new
+
+class TorboxPreferenceTest < Minitest::Test
+  def setup
+    SettingsService.set(:auto_select_confidence_threshold, 90)
+    SettingsService.set(:auto_select_min_seeders, 1)
+    SettingsService.set(:jackett_url, 'http://jackett:9117')
+    @user = User.create!(username: "test_#{SecureRandom.hex(4)}", name: 'Test', password: 'Test-password-123')
+    book = Book.create!(title: 'Test Book', author: 'Author', book_type: :audiobook)
+    @request = Request.create!(user: @user, book: book, language: 'en')
+    DownloadClient.delete_all
+    @dc = DownloadClient.create!(name: 'Torbox', client_type: 'qbittorrent', url: 'http://rdt:6500')
+    @a = result(99, 10)
+    @b = result(94, 0)
+    @hash = 'a' * 40
+  end
+  def result(score, seeds, **attrs)
+    @request.search_results.create!({title: 'Test Book.m4b', guid: SecureRandom.uuid, source: 'jackett',
+      confidence_score: score, seeders: seeds, detected_language: 'en', magnet_url: "magnet:?xt=urn:btih:#{SecureRandom.hex(20)}",
+      score_breakdown: {'auto_select_allowed'=>true}}.merge(attrs))
+  end
+  def preference(client: nil, resolver: nil)
+    ShelfarrTorboxCache::Preference.new(config: {'download_client_id'=>@dc.id,'api_key'=>'test'},
+      resolver: resolver || ->(r) { r.id == @b.id ? @hash : 'b'*40 },
+      client: client || Struct.new(:hashes) { def cached_hashes(h); hashes & h; end }.new([@hash]))
+  end
+  def with_preference(pref = preference)
+    ShelfarrTorboxCache::Preference.stub(:new, pref) { yield AutoSelectService.new(@request) }
+  end
+  def test_cached_zero_seed_selected_and_download_queued
+    with_preference do |service|
+      selection = service.call
+      assert selection.success?
+      assert_equal @b.id, selection.search_result.id
+      assert @request.downloads.exists?
+    end
+  end
+  def test_ebooks_do_not_check_torbox_or_bypass_seeders
+    @request.book.update!(book_type: :ebook)
+    called = false
+    ShelfarrTorboxCache::Preference.stub(:new, -> { called = true; preference }) do
+      service = AutoSelectService.new(@request)
+      assert_equal [@a.id,@b.id], service.send(:find_matching_results).map(&:id)
+      refute service.send(:meets_seeder_threshold?, @b)
+    end
+    refute called, 'Ebook must not query TorBox'
+  end
+  def test_cache_miss_keeps_existing_ranking_and_seeder_requirement
+    client = Struct.new(:unused) { def cached_hashes(h); []; end }.new
+    with_preference(preference(client: client)) do |service|
+      assert_equal [@a.id,@b.id], service.send(:find_matching_results).map(&:id)
+      refute service.send(:meets_seeder_threshold?, @b)
+    end
+  end
+  def test_failure_falls_back
+    client = Object.new
+    def client.cached_hashes(h); raise IOError; end
+    with_preference(preference(client: client)) { |s| assert_equal @a.id, s.call.search_result.id }
+  end
+  def test_quality_language_blocklist_and_format_filters_still_apply
+    @b.update!(confidence_score: 20)
+    with_preference { |s| assert_equal @a.id, s.send(:find_matching_results).first.id }
+    @b.update!(confidence_score:94, detected_language:'de')
+    with_preference { |s| assert_equal [@a.id], s.send(:find_matching_results).map(&:id) }
+    @b.update!(detected_language:'en',blocklisted_at:Time.current)
+    with_preference { |s| assert_equal [@a.id], s.send(:find_matching_results).map(&:id) }
+    @b.update!(blocklisted_at:nil,score_breakdown:{'auto_select_allowed'=>false})
+    with_preference { |s| assert_equal [@a.id], s.send(:find_matching_results).map(&:id) }
+  end
+  def test_other_download_client_is_not_cache_preferred
+    other = DownloadClient.create!(name:'Other',client_type:'transmission',url:'http://other:9091')
+    DownloadRoutingRule.stub(:routed_client_for, other) { assert_empty preference.cached_ids([@a,@b]) }
+  end
+  def test_non_torrent_preference_slots_stay_in_place
+    direct = result(98, nil, source:'gutenberg',magnet_url:nil,download_url:'https://example.test/book.epub')
+    with_preference do |service|
+      original = service.method(:find_matching_results).super_method.call
+      ranked = service.send(:find_matching_results)
+      assert_equal original.index(direct), ranked.index(direct)
+      assert_operator ranked.index(@b), :<, ranked.index(@a)
+    end
+  end
+  def test_retry_uses_cache_preference_too
+    with_preference do
+      assert_equal :selected_next, @request.send(:attempt_next_candidate!, failure_reason:'test')
+      assert_equal @b.id, @request.downloads.last.search_result_id
+    end
+  end
+  def test_disabled_client_is_not_cache_preferred
+    @dc.update!(enabled:false)
+    assert_empty preference.cached_ids([@a,@b])
+  end
+  def test_hash_resolver_magnet_and_jackett_redirect
+    resolver = ShelfarrTorboxCache::HashResolver.new
+    assert_equal MagnetLink.info_hash(@b.magnet_url), resolver.call(@b)
+    @b.update!(magnet_url:nil,download_url:'http://jackett:9117/dl/audiobookbay/?apikey=test')
+    response = Net::HTTPFound.new('1.1','302','Found'); response['location']="magnet:?xt=urn:btih:#{@hash}"
+    ShelfarrTorboxCache.stub(:get,[response,'']) { assert_equal @hash, resolver.call(@b) }
+  end
+  def test_torrent_file_and_external_redirect
+    resolver = ShelfarrTorboxCache::HashResolver.new
+    @b.update!(magnet_url:nil,download_url:"http://jackett:9117/dl/audiobookbay/?id=#{SecureRandom.hex(5)}")
+    info={'name'=>'test.m4b','length'=>100,'piece length'=>16384,'pieces'=>'x'*20}
+    response=Net::HTTPOK.new('1.1','200','OK')
+    ShelfarrTorboxCache.stub(:get,[response,{'info'=>info}.bencode]) do
+      assert_equal Digest::SHA1.hexdigest(info.bencode), resolver.call(@b)
+    end
+    @b.download_url += '&different=1'
+    response=Net::HTTPFound.new('1.1','302','Found');response['location']='http://elsewhere/file'
+    ShelfarrTorboxCache.stub(:get,[response,'']) { assert_nil resolver.call(@b) }
+  end
+  def test_api_response_only_accepts_requested_hashes
+    response=Net::HTTPOK.new('1.1','200','OK')
+    body={success:true,data:[{hash:@hash},{hash:'c'*40}]}.to_json
+    ShelfarrTorboxCache.stub(:get,[response,body]) do
+      assert_equal [@hash], ShelfarrTorboxCache::Client.new('test').cached_hashes([@hash])
+    end
+    ShelfarrTorboxCache.stub(:get,[response,'{"success":false,"data":[]}']) do
+      assert_raises(ShelfarrTorboxCache::LookupError) { ShelfarrTorboxCache::Client.new('test').cached_hashes([@hash]) }
+    end
+  end
+end

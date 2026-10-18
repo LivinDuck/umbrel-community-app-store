@@ -1,0 +1,11 @@
+This integration reuses BookOrbit v3.3.0, commit e767358, https://github.com/BookOrbit/BookOrbit.
+BookOrbit code is distributed under GNU AGPL v3 (see LICENSE-BookOrbit).
+client/vendor/useCandidateGroups.ts and the provider sorting, edition selection,
+work identity and language helpers are copied from BookOrbit. useMetadataSearch.ts
+has its API import redirected to the Shelfarr adapter. Other files implement the
+Shelfarr adapter and interface. Corresponding source is downloadable from the
+search footer. The running BookOrbit server supplies the unmodified metadata
+providers, query fallbacks and relevance filtering. No provider key is added by
+this integration. It depends on the local BookOrbit instance and its configured
+providers. Shelfarr's existing request policies and acquisition system remain in use.
+Integration code is offered under AGPL-3.0-or-later. Shelfarr itself is GPL-3.0.
