@@ -50,7 +50,7 @@ http.createServer(async (req, res) => {
 """
 
 
-def main(auth):
+def main(auth, upgrade=False):
     package = yaml.safe_load((APP / 'docker-compose.yml').read_text())
     manifest = yaml.safe_load((APP / 'umbrel-app.yml').read_text())
     assert set(package['services']) == {'app_proxy', 'web'}
@@ -64,6 +64,10 @@ def main(auth):
     assert 'ports' not in web and 'network_mode' not in web
     assert not any(key.startswith('MURMUR_BUILTIN_HERMES_') for key in web['environment'])
     assert 'HERMES_URL' not in web['environment']
+    target_image = web['image']
+    if upgrade:
+        # The image shipped by both 0.5.1 and 0.5.1-patch.1.
+        web['image'] = 'ghcr.io/getumbrel/murmur:v0.5.1@sha256:7a2cea6e1dc0f5a37127f367a9c278586cb1b047557a258e4082a3d78fc3b732'
     hermes_url = 'http://hermes-agent_web_1:18789'
     package.pop('version', None)
 
@@ -179,6 +183,19 @@ def main(auth):
                 capture=True).stdout.strip()
             assert int(mode) == 0o600
 
+            if upgrade:
+                web['image'] = target_image
+                file.write_text(yaml.safe_dump(package, sort_keys=False))
+                compose('up', '-d', '--wait', '--wait-timeout', '120', 'web')
+                upgraded = ready()
+                assert upgraded['id'] == connected['id']
+                assert upgraded['name'] == 'My existing Hermes'
+                assert upgraded['source'] == 'saved' and not upgraded['managed']
+                assert saved_settings() == settings
+                setup = json.loads(request('/murmur/setup')[1])
+                assert setup['decided'] and setup['builtin'] is None
+                assert request('/hermes/api/sessions')[0] == 200
+
             compose('restart', 'web')
             assert ready()['name'] == 'My existing Hermes'
             compose('up', '-d', '--force-recreate', '--wait', '--wait-timeout', '120', 'web')
@@ -196,7 +213,7 @@ def main(auth):
                 raise AssertionError('Hermes token refresh failed after restart')
             assert request(connection_path, method='DELETE')[0] == 200
             assert not json.loads(request('/murmur/setup')[1])['decided']
-            print(f'PASS ({auth}): server choice, sign-in, editable connection, persistence and reconnect')
+            print(f'PASS ({auth}, upgrade={upgrade}): server choice, sign-in, editable connection, persistence and reconnect')
         except Exception:
             compose('logs', '--tail', '80')
             raise
@@ -206,5 +223,6 @@ def main(auth):
 
 
 if __name__ == '__main__':
-    for auth in ('token', 'password'):
-        main(auth)
+    for upgrade in (False, True):
+        for auth in ('token', 'password'):
+            main(auth, upgrade=upgrade)

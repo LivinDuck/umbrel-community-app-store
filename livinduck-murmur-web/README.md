@@ -1,11 +1,11 @@
 # Murmur Web
 
-Murmur **0.5.1** (package **0.5.1-patch.1**), using the official upstream multi-architecture image, with only
+Murmur **0.7.0** (package **0.7.0**), using the official upstream multi-architecture image, with only
 the web service and Umbrel login proxy. No bundled Hermes container is installed.
 
 ## Fresh installation
 
-1. Install and configure **Hermes Agent** from Umbrel's official store.
+1. Install and configure **Hermes Agent** (0.21.4 or newer) from Umbrel's official store.
 2. Install **Murmur Web** from the LivinDuck community store.
 3. Open Murmur Web, choose your Hermes server, and enter its credentials if requested.
 
@@ -18,11 +18,12 @@ This does not imply support for arbitrary reverse-proxy or SSO authentication.
 Manage server addresses and credentials in **Settings → Server**. Voice input
 needs HTTPS; ordinary chat can use Umbrel's local HTTP address.
 
-### Updating from 0.5.1
+### Updating from 0.5.1 or 0.5.1-patch.1
 
 Update Murmur Web in Umbrel; no uninstall or data reset is needed. The fixed
 connection disappears and server selection returns if no saved connections exist.
-Previously saved connections remain available in Settings → Server.
+Previously saved connections remain available in Settings → Server. Newer features
+may require a newer Hermes Agent version; update that separate app as needed.
 
 ## Data and updates
 
@@ -41,7 +42,7 @@ The package linter checks Compose wiring, public image availability, and AMD64 /
 ARM64 support. The Murmur-specific CI test runs the pinned image on both
 architectures with a disposable Hermes API fixture. It checks the web UI,
 absence of built-in Hermes, server selection, token and password authentication,
-removal of the old fixed connection on update,
+removal of the old fixed connection on update, saved-connection upgrades from 0.5.1,
 cross-origin rejection, writable settings and persistence across restart and
 container recreation. The fixture is not a full Hermes Agent installation.
 
@@ -49,6 +50,6 @@ Real Umbrel installation, its login proxy, live agent chat and browser interacti
 are not covered by that disposable test. No NAS installation is performed when
 publishing this package.
 
-Upstream documentation: https://github.com/getumbrel/murmur/blob/v0.5.1/docs/STANDALONE.md
+Upstream documentation: https://github.com/getumbrel/murmur/blob/v0.7.0/docs/STANDALONE.md
 
 The upstream icon is distributed under the accompanying `UPSTREAM-LICENSE` (MIT).

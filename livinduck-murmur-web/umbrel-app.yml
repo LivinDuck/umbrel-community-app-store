@@ -4,7 +4,7 @@ storage:
   dataRoot: data
 category: ai
 name: Murmur Web
-version: "0.5.1-patch.1"
+version: "0.7.0"
 tagline: A web interface for your existing Hermes agents
 description: >-
   Murmur's web interface without a bundled Hermes instance. Requires the separate
@@ -26,9 +26,17 @@ description: >-
   Murmur app's bundled Hermes. Additional remote Hermes servers can be added in
   Settings. Saved connections and their credentials can be edited there.
 releaseNotes: >-
-  Restores server selection and sign-in by removing the fixed Hermes connection.
-  Choose a server on first open, or manage connections in Settings → Server.
-  Existing saved connections are preserved. No bundled Hermes is installed.
+  Updates Murmur to 0.7.0 with agent password management, masked requests for
+  logins and codes, clearer routine results and notifications, and improvements
+  to single-agent chats, mobile layout and model search.
+
+
+  Keeps the web-only setup with your separate Hermes Agent app, editable server
+  connections and saved settings. No bundled Hermes container is installed.
+  Hermes 0.21.4 or newer is required; newer features depend on your Hermes version.
+
+
+  Full release notes: https://github.com/getumbrel/murmur/releases/tag/v0.7.0
 developer: Umbrel
 website: https://github.com/getumbrel/murmur
 dependencies:
