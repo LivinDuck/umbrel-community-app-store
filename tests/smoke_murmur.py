@@ -66,8 +66,8 @@ def main(auth, upgrade=False):
     assert 'HERMES_URL' not in web['environment']
     target_image = web['image']
     if upgrade:
-        # The image shipped by both 0.5.1 and 0.5.1-patch.1.
-        web['image'] = 'ghcr.io/getumbrel/murmur:v0.5.1@sha256:7a2cea6e1dc0f5a37127f367a9c278586cb1b047557a258e4082a3d78fc3b732'
+        # Test an upgrade from a previously shipped image.
+        web['image'] = upgrade
     hermes_url = 'http://hermes-agent_web_1:18789'
     package.pop('version', None)
 
@@ -223,6 +223,10 @@ def main(auth, upgrade=False):
 
 
 if __name__ == '__main__':
-    for upgrade in (False, True):
+    for upgrade in (
+        False,
+        'ghcr.io/getumbrel/murmur:v0.5.1@sha256:7a2cea6e1dc0f5a37127f367a9c278586cb1b047557a258e4082a3d78fc3b732',
+        'ghcr.io/getumbrel/murmur:v0.7.0@sha256:803766f5ed8514c7d13d3c5a714d2ab7ac6a9c52d4d986ea53bf802ef458ce4d',
+    ):
         for auth in ('token', 'password'):
             main(auth, upgrade=upgrade)

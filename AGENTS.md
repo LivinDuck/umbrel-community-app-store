@@ -8,3 +8,5 @@
 - Keep browser onboarding protected by Umbrel auth; exempt only necessary client protocol paths.
 - Publishing a package does not authorize installation on the NAS or changes to client devices.
 - Run package lint and applicable CI checks. State clearly whether Umbrel and real-device tests were performed.
+
+- For Murmur maintenance, read `livinduck-murmur-web/AGENTS.md`; preserve its user-supplied dark icon as well as web-only operation.

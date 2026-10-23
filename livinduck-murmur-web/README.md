@@ -1,6 +1,6 @@
 # Murmur Web
 
-Murmur **0.7.0** (package **0.7.0**), using the official upstream multi-architecture image, with only
+Murmur **0.7.1** (package **0.7.1**), using the official upstream multi-architecture image, with only
 the web service and Umbrel login proxy. No bundled Hermes container is installed.
 
 ## Fresh installation
@@ -42,7 +42,7 @@ The package linter checks Compose wiring, public image availability, and AMD64 /
 ARM64 support. The Murmur-specific CI test runs the pinned image on both
 architectures with a disposable Hermes API fixture. It checks the web UI,
 absence of built-in Hermes, server selection, token and password authentication,
-removal of the old fixed connection on update, saved-connection upgrades from 0.5.1,
+removal of the old fixed connection on update, saved-connection upgrades from 0.5.1 and 0.7.0,
 cross-origin rejection, writable settings and persistence across restart and
 container recreation. The fixture is not a full Hermes Agent installation.
 
@@ -50,6 +50,12 @@ Real Umbrel installation, its login proxy, live agent chat and browser interacti
 are not covered by that disposable test. No NAS installation is performed when
 publishing this package.
 
-Upstream documentation: https://github.com/getumbrel/murmur/blob/v0.7.0/docs/STANDALONE.md
+Upstream documentation: https://github.com/getumbrel/murmur/blob/v0.7.1/docs/STANDALONE.md
 
-The upstream icon is distributed under the accompanying `UPSTREAM-LICENSE` (MIT).
+## Custom icon
+
+The Umbrel catalog/launcher uses the user-provided `murmur-samsung-dark.svg`,
+committed as `icon.svg`. Keep this artwork across upstream updates; see
+[maintenance instructions](AGENTS.md). The upstream container's browser/PWA
+icons are separate. The upstream MIT notice is retained in `UPSTREAM-LICENSE`
+for the underlying artwork.
