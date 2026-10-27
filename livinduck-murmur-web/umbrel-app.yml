@@ -4,7 +4,7 @@ storage:
   dataRoot: data
 category: ai
 name: Murmur Web
-version: "0.7.1"
+version: "0.8.0"
 tagline: A web interface for your existing Hermes agents
 description: >-
   Murmur's web interface without a bundled Hermes instance. Requires the separate
@@ -26,21 +26,22 @@ description: >-
   Murmur app's bundled Hermes. Additional remote Hermes servers can be added in
   Settings. Saved connections and their credentials can be edited there.
 releaseNotes: >-
-  Updates Murmur to 0.7.1. Routine results appear correctly with Hermes 0.22.3,
-  and reading a chat marks it read in Hermes. Adds a new-chat button to agent
-  sidebar rows, keeps chat titles visible, and fixes WhatsApp setup retries.
+  Updates Murmur to 0.8.0. Notifications can reach your devices while Murmur is
+  closed when an agent finishes, needs input or approval, or a routine has news.
+  Enable them in Settings over HTTPS; on iPhone and iPad, open Murmur from the
+  Home Screen.
 
 
-  Upstream also removes the untrusted mark from the Umbrel connection and sets
-  connected agents to full access once, avoiding approval prompts for each
-  Umbrel action. A trust restriction deliberately set again afterwards is kept.
+  Adds chat pinning, renaming and archiving, undo for archive and delete,
+  cross-device message updates, and clearer approval cards.
 
 
-  Uses the custom Samsung dark icon. Preserves web-only operation, the separate
-  Hermes Agent app, editable connections and saved settings; no bundled Hermes.
+  Preserves web-only operation with your separate Hermes Agent app, editable
+  connections, saved settings and the custom Samsung dark icon. Notification
+  settings and keys persist in the existing data folder. No bundled Hermes.
 
 
-  Full release notes: https://github.com/getumbrel/murmur/releases/tag/v0.7.1
+  Full release notes: https://github.com/getumbrel/murmur/releases/tag/v0.8.0
 developer: Umbrel
 website: https://github.com/getumbrel/murmur
 dependencies:

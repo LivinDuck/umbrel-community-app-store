@@ -196,11 +196,25 @@ def main(auth, upgrade=False):
                 assert setup['decided'] and setup['builtin'] is None
                 assert request('/hermes/api/sessions')[0] == 200
 
+            # 0.8.0 stores push keys in the existing /data mount, without a subscription
+            # or external push request. Registration must still reject cross-origin writes.
+            code, body = request('/murmur/notifications')
+            notifications = json.loads(body)
+            assert code == 200 and notifications['key'] and not notifications['known']
+            assert request('/murmur/notifications/devices', {},
+                           origin='https://untrusted.example')[0] == 403
+            assert request('/murmur/notifications/devices', {})[0] == 422
+            notification_mode = compose('exec', '-T', 'web', 'node', '-e',
+                "console.log(require('node:fs').statSync('/data/notifications.json').mode & 0o777)",
+                capture=True).stdout.strip()
+            assert int(notification_mode) == 0o600
+
             compose('restart', 'web')
             assert ready()['name'] == 'My existing Hermes'
             compose('up', '-d', '--force-recreate', '--wait', '--wait-timeout', '120', 'web')
             assert ready()['name'] == 'My existing Hermes'
             assert saved_settings() == settings
+            assert json.loads(request('/murmur/notifications')[1])['key'] == notifications['key']
 
             # Hermes restarts rotate its token. Murmur must recover without storing it.
             compose('restart', 'hermes-fixture')
@@ -227,6 +241,7 @@ if __name__ == '__main__':
         False,
         'ghcr.io/getumbrel/murmur:v0.5.1@sha256:7a2cea6e1dc0f5a37127f367a9c278586cb1b047557a258e4082a3d78fc3b732',
         'ghcr.io/getumbrel/murmur:v0.7.0@sha256:803766f5ed8514c7d13d3c5a714d2ab7ac6a9c52d4d986ea53bf802ef458ce4d',
+        'ghcr.io/getumbrel/murmur:v0.7.1@sha256:9f108714aa42d8880ff6b1eabd5ed7359d67fab37577d251b07f6f4cca084406',
     ):
         for auth in ('token', 'password'):
             main(auth, upgrade=upgrade)

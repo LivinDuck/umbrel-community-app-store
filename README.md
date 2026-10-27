@@ -20,7 +20,7 @@ the app. Install it when you are ready.
 | DiscoPanel | 2.0.15 | [Setup and limitations](livinduck-discopanel/README.md) |
 | ClipSync | 1.0.2 | [Pairing and dedicated-port HTTPS setup](livinduck-clipsync/README.md) |
 | Shelfarr | 2026.10.05.1 | [Setup and library folders](livinduck-shelfarr/README.md) |
-| Murmur Web | 0.7.1 | [Connect to the existing Hermes Agent app](livinduck-murmur-web/README.md) |
+| Murmur Web | 0.8.0 | [Connect to the existing Hermes Agent app](livinduck-murmur-web/README.md) |
 
 ## Packaging workflow
 

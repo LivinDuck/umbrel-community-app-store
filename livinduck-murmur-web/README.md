@@ -1,6 +1,6 @@
 # Murmur Web
 
-Murmur **0.7.1** (package **0.7.1**), using the official upstream multi-architecture image, with only
+Murmur **0.8.0** (package **0.8.0**), using the official upstream multi-architecture image, with only
 the web service and Umbrel login proxy. No bundled Hermes container is installed.
 
 ## Fresh installation
@@ -17,6 +17,11 @@ This does not imply support for arbitrary reverse-proxy or SSO authentication.
 
 Manage server addresses and credentials in **Settings → Server**. Voice input
 needs HTTPS; ordinary chat can use Umbrel's local HTTP address.
+
+Background notifications also require HTTPS and must be enabled in Settings.
+On iPhone and iPad, open Murmur from the Home Screen to enable them. Notification
+subscriptions and keys persist in `data/murmur/notifications.json` alongside
+connection settings. No additional volume or bundled Hermes service is needed.
 
 ### Updating from 0.5.1 or 0.5.1-patch.1
 
@@ -42,7 +47,7 @@ The package linter checks Compose wiring, public image availability, and AMD64 /
 ARM64 support. The Murmur-specific CI test runs the pinned image on both
 architectures with a disposable Hermes API fixture. It checks the web UI,
 absence of built-in Hermes, server selection, token and password authentication,
-removal of the old fixed connection on update, saved-connection upgrades from 0.5.1 and 0.7.0,
+removal of the old fixed connection on update, saved-connection upgrades from 0.5.1, 0.7.0 and 0.7.1,
 cross-origin rejection, writable settings and persistence across restart and
 container recreation. The fixture is not a full Hermes Agent installation.
 
@@ -50,7 +55,7 @@ Real Umbrel installation, its login proxy, live agent chat and browser interacti
 are not covered by that disposable test. No NAS installation is performed when
 publishing this package.
 
-Upstream documentation: https://github.com/getumbrel/murmur/blob/v0.7.1/docs/STANDALONE.md
+Upstream documentation: https://github.com/getumbrel/murmur/blob/v0.8.0/docs/STANDALONE.md
 
 ## Custom icon
 
