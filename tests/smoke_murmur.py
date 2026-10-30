@@ -183,6 +183,10 @@ def main(auth, upgrade=False):
                 capture=True).stdout.strip()
             assert int(mode) == 0o600
 
+            previous_push_key = None
+            if upgrade and ':v0.8.0@' in upgrade:
+                previous_push_key = json.loads(request('/murmur/notifications')[1])['key']
+
             if upgrade:
                 web['image'] = target_image
                 file.write_text(yaml.safe_dump(package, sort_keys=False))
@@ -201,6 +205,8 @@ def main(auth, upgrade=False):
             code, body = request('/murmur/notifications')
             notifications = json.loads(body)
             assert code == 200 and notifications['key'] and not notifications['known']
+            if previous_push_key:
+                assert notifications['key'] == previous_push_key
             assert request('/murmur/notifications/devices', {},
                            origin='https://untrusted.example')[0] == 403
             assert request('/murmur/notifications/devices', {})[0] == 422
@@ -242,6 +248,7 @@ if __name__ == '__main__':
         'ghcr.io/getumbrel/murmur:v0.5.1@sha256:7a2cea6e1dc0f5a37127f367a9c278586cb1b047557a258e4082a3d78fc3b732',
         'ghcr.io/getumbrel/murmur:v0.7.0@sha256:803766f5ed8514c7d13d3c5a714d2ab7ac6a9c52d4d986ea53bf802ef458ce4d',
         'ghcr.io/getumbrel/murmur:v0.7.1@sha256:9f108714aa42d8880ff6b1eabd5ed7359d67fab37577d251b07f6f4cca084406',
+        'ghcr.io/getumbrel/murmur:v0.8.0@sha256:9c35e0fd6da1b979038e9a4684047bea9a9599af2c13e9696c92143447898475',
     ):
         for auth in ('token', 'password'):
             main(auth, upgrade=upgrade)

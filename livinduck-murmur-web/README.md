@@ -1,6 +1,6 @@
 # Murmur Web
 
-Murmur **0.8.0** (package **0.8.0**), using the official upstream multi-architecture image, with only
+Murmur **0.9.0** (package **0.9.0**), using the official upstream multi-architecture image, with only
 the web service and Umbrel login proxy. No bundled Hermes container is installed.
 
 ## Fresh installation
@@ -30,6 +30,14 @@ connection disappears and server selection returns if no saved connections exist
 Previously saved connections remain available in Settings → Server. Newer features
 may require a newer Hermes Agent version; update that separate app as needed.
 
+## Features that depend on Hermes
+
+Email in Murmur 0.9.0 requires the `murmur-mail` plugin, bundled in Umbrel's
+Hermes image `v0.22.5-1`. If your separate Hermes Agent lacks it, Murmur does
+not offer email. Update Hermes Agent separately when needed; this package
+never supplies or updates it. Apps connected through Nous Research require
+consent in Murmur before connecting.
+
 ## Data and updates
 
 - Murmur settings persist in `data/murmur`, mounted at `/data`.
@@ -47,7 +55,7 @@ The package linter checks Compose wiring, public image availability, and AMD64 /
 ARM64 support. The Murmur-specific CI test runs the pinned image on both
 architectures with a disposable Hermes API fixture. It checks the web UI,
 absence of built-in Hermes, server selection, token and password authentication,
-removal of the old fixed connection on update, saved-connection upgrades from 0.5.1, 0.7.0 and 0.7.1,
+removal of the old fixed connection on update, saved-connection upgrades from 0.5.1, 0.7.0, 0.7.1 and 0.8.0,
 cross-origin rejection, writable settings and persistence across restart and
 container recreation. The fixture is not a full Hermes Agent installation.
 
@@ -55,7 +63,7 @@ Real Umbrel installation, its login proxy, live agent chat and browser interacti
 are not covered by that disposable test. No NAS installation is performed when
 publishing this package.
 
-Upstream documentation: https://github.com/getumbrel/murmur/blob/v0.8.0/docs/STANDALONE.md
+Upstream documentation: https://github.com/getumbrel/murmur/blob/v0.9.0/docs/STANDALONE.md
 
 ## Custom icon
 

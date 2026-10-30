@@ -4,7 +4,7 @@ storage:
   dataRoot: data
 category: ai
 name: Murmur Web
-version: "0.8.0"
+version: "0.9.0"
 tagline: A web interface for your existing Hermes agents
 description: >-
   Murmur's web interface without a bundled Hermes instance. Requires the separate
@@ -26,22 +26,25 @@ description: >-
   Murmur app's bundled Hermes. Additional remote Hermes servers can be added in
   Settings. Saved connections and their credentials can be edited there.
 releaseNotes: >-
-  Updates Murmur to 0.8.0. Notifications can reach your devices while Murmur is
-  closed when an agent finishes, needs input or approval, or a routine has news.
-  Enable them in Settings over HTTPS; on iPhone and iPad, open Murmur from the
-  Home Screen.
+  Updates Murmur to 0.9.0 with email for agents, apps connected through Nous
+  Research after consent, and support for any OpenAI-compatible model server,
+  including servers that require an API key.
 
 
-  Adds chat pinning, renaming and archiving, undo for archive and delete,
-  cross-device message updates, and clearer approval cards.
+  Adds clearer helper progress cards, improved sidebar ordering and single-agent
+  chat lists, and fixes for iPhone Home Screen icons and duplicate chat names.
 
 
-  Preserves web-only operation with your separate Hermes Agent app, editable
-  connections, saved settings and the custom Samsung dark icon. Notification
-  settings and keys persist in the existing data folder. No bundled Hermes.
+  Email requires the murmur-mail plugin in your separate Hermes Agent, included
+  in Umbrel's Hermes image v0.22.5-1. Hermes installations without the plugin
+  do not offer email. This package does not install or update Hermes Agent.
 
 
-  Full release notes: https://github.com/getumbrel/murmur/releases/tag/v0.8.0
+  Preserves web-only operation, editable connections, saved settings and the
+  custom Samsung dark icon. No bundled Hermes container is installed.
+
+
+  Full release notes: https://github.com/getumbrel/murmur/releases/tag/v0.9.0
 developer: Umbrel
 website: https://github.com/getumbrel/murmur
 dependencies:
