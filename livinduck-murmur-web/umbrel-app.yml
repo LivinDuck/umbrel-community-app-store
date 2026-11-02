@@ -4,7 +4,7 @@ storage:
   dataRoot: data
 category: ai
 name: Murmur Web
-version: "0.11.0"
+version: "0.11.1"
 tagline: A web interface for your existing Hermes agents
 description: >-
   Murmur's web interface without a bundled Hermes instance. Requires the separate
@@ -26,22 +26,20 @@ description: >-
   Murmur app's bundled Hermes. Additional remote Hermes servers can be added in
   Settings. Saved connections and their credentials can be edited there.
 releaseNotes: >-
-  Updates Murmur from 0.9.0 to 0.11.0 with voice calls, live browser and virtual
-  machine views, foldable agent sections, pinned models, and larger uploads.
-  Agents can end a call when you say goodbye. Calls require HTTPS and compatible
-  voice support in your separate Hermes Agent.
+  Updates Murmur to 0.11.1. Agent browsers appear automatically in chat and show
+  the site loading while they open. Pinned models remain visible in their
+  service's full model list.
 
 
-  Improves chat history, drafts, reconnects and notifications. Adds protection
-  against revealing provider keys through the browser proxy. Email setup can
-  now offer to install the required plugin on your connected Hermes.
+  Fixes menu placement and accidental selection of the first menu item when
+  touching and holding on phones.
 
 
-  Preserves web-only operation, editable connections, saved settings and the
-  custom Samsung dark icon. This package does not bundle or update Hermes Agent.
+  Preserves web-only operation, editable external Hermes connections, saved
+  settings and the custom Samsung dark icon. No bundled Hermes is installed.
 
 
-  Full release notes: https://github.com/getumbrel/murmur/releases/tag/v0.11.0
+  Full release notes: https://github.com/getumbrel/murmur/releases/tag/v0.11.1
 developer: Umbrel
 website: https://github.com/getumbrel/murmur
 dependencies:
