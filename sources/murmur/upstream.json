@@ -1,0 +1,6 @@
+{
+  "version": "0.11.1",
+  "commit": "0e19f043e28549e30414be7c1dc1abaa83ba4b11",
+  "image": "ghcr.io/getumbrel/murmur:v0.11.1@sha256:0bbf9af2016f8e57856e6ebf729b6a0c8fb864bb5513dd555167f61edf5bd289",
+  "packageVersion": "0.11.1-patch.1"
+}

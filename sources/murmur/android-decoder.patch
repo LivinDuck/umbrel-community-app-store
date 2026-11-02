@@ -1,0 +1,1029 @@
+diff --git a/package-lock.json b/package-lock.json
+index 1412832..2043b06 100644
+--- a/package-lock.json
++++ b/package-lock.json
+@@ -7,6 +7,7 @@
+     "": {
+       "name": "murmur",
+       "version": "0.11.1",
++      "hasInstallScript": true,
+       "license": "MIT",
+       "dependencies": {
+         "@fontsource-variable/inter": "^5.3.0",
+@@ -41,50 +42,12 @@
+         "electron-builder": "26.15.3",
+         "electron-updater": "6.8.9",
+         "esbuild": "0.28.2",
++        "patch-package": "^8.0.1",
+         "tailwindcss": "^4.3.3",
+         "typescript": "^7.0.2",
+         "vite": "^8.3.4",
+-        "vitest": "^5.0.4"
+-      }
+-    },
+-    "node_modules/@babel/helper-string-parser": {
+-      "version": "7.29.7",
+-      "resolved": "https://registry.npmjs.org/@babel/helper-string-parser/-/helper-string-parser-7.29.7.tgz",
+-      "integrity": "sha512-Pb5ijPrZ89GDH8223L4UP8i6QApWxs04RbPQJTeWDV0/keR2E36MeKnyr6LYmUUvqRRI+Iv87SuF1W6ErINzYw==",
+-      "dev": true,
+-      "license": "MIT",
+-      "optional": true,
+-      "peer": true,
+-      "engines": {
+-        "node": ">=6.9.0"
+-      }
+-    },
+-    "node_modules/@babel/helper-validator-identifier": {
+-      "version": "7.29.7",
+-      "resolved": "https://registry.npmjs.org/@babel/helper-validator-identifier/-/helper-validator-identifier-7.29.7.tgz",
+-      "integrity": "sha512-qehxGkRj55h/ff8EMaJ+cYhyaKlHIxqYDn682wQD7RNp9UujOQsHog2uS0r2vzr4pW+sXf90NeeayjcNaX3fFg==",
+-      "dev": true,
+-      "license": "MIT",
+-      "optional": true,
+-      "peer": true,
+-      "engines": {
+-        "node": ">=6.9.0"
+-      }
+-    },
+-    "node_modules/@babel/types": {
+-      "version": "7.29.8",
+-      "resolved": "https://registry.npmjs.org/@babel/types/-/types-7.29.8.tgz",
+-      "integrity": "sha512-Vj1jF3cPfxg7OAfoI7QnVKLoILlm2JF9pnVHrX8qx7AHMiYWT+NDAA7jChlNgRS4WTLc/fD1lXLmPixluj+3Gg==",
+-      "dev": true,
+-      "license": "MIT",
+-      "optional": true,
+-      "peer": true,
+-      "dependencies": {
+-        "@babel/helper-string-parser": "^7.29.7",
+-        "@babel/helper-validator-identifier": "^7.29.7"
+-      },
+-      "engines": {
+-        "node": ">=6.9.0"
++        "vitest": "^5.0.4",
++        "ws": "^8.22.1"
+       }
+     },
+     "node_modules/@electron-internal/extract-zip": {
+@@ -2837,6 +2800,13 @@
+         "node": ">=10.0.0"
+       }
+     },
++    "node_modules/@yarnpkg/lockfile": {
++      "version": "1.1.0",
++      "resolved": "https://registry.npmjs.org/@yarnpkg/lockfile/-/lockfile-1.1.0.tgz",
++      "integrity": "sha512-GpSwvyXOcOOlV70vbnzjj4fW5xW/FdUF6nQEt1ENy7m4ZCczi1+/buVUPAqmGfqznsORNFzUMjctTIp8a9tuCQ==",
++      "dev": true,
++      "license": "BSD-2-Clause"
++    },
+     "node_modules/abbrev": {
+       "version": "4.0.0",
+       "resolved": "https://registry.npmjs.org/abbrev/-/abbrev-4.0.0.tgz",
+@@ -3148,18 +3118,6 @@
+       "dev": true,
+       "license": "MIT"
+     },
+-    "node_modules/babel-plugin-react-compiler": {
+-      "version": "1.0.0",
+-      "resolved": "https://registry.npmjs.org/babel-plugin-react-compiler/-/babel-plugin-react-compiler-1.0.0.tgz",
+-      "integrity": "sha512-Ixm8tFfoKKIPYdCCKYTsqv+Fd4IJ0DQqMyEimo+pxUOMUR9cVPlwTrFt9Avu+3cb6Zp3mAzl+t1MrG2fxxKsxw==",
+-      "dev": true,
+-      "license": "MIT",
+-      "optional": true,
+-      "peer": true,
+-      "dependencies": {
+-        "@babel/types": "^7.26.0"
+-      }
+-    },
+     "node_modules/bail": {
+       "version": "2.0.2",
+       "resolved": "https://registry.npmjs.org/bail/-/bail-2.0.2.tgz",
+@@ -3230,6 +3188,19 @@
+         "node": "20 || >=22"
+       }
+     },
++    "node_modules/braces": {
++      "version": "3.0.3",
++      "resolved": "https://registry.npmjs.org/braces/-/braces-3.0.3.tgz",
++      "integrity": "sha512-yQbXgO/OSZVD2IsiLlro+7Hf6Q18EJrKSEsdoMzKePKXct3gvD8oLcOQdIzGupr5Fj+EDe8gO/lxc1BzfMpxvA==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "fill-range": "^7.1.1"
++      },
++      "engines": {
++        "node": ">=8"
++      }
++    },
+     "node_modules/buffer-from": {
+       "version": "1.1.2",
+       "resolved": "https://registry.npmjs.org/buffer-from/-/buffer-from-1.1.2.tgz",
+@@ -3316,6 +3287,25 @@
+         "node": ">=8"
+       }
+     },
++    "node_modules/call-bind": {
++      "version": "1.0.9",
++      "resolved": "https://registry.npmjs.org/call-bind/-/call-bind-1.0.9.tgz",
++      "integrity": "sha512-a/hy+pNsFUTR+Iz8TCJvXudKVLAnz/DyeSUo10I5yvFDQJBFU2s9uqQpoSrJlroHUKoKqzg+epxyP9lqFdzfBQ==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "call-bind-apply-helpers": "^1.0.2",
++        "es-define-property": "^1.0.1",
++        "get-intrinsic": "^1.3.0",
++        "set-function-length": "^1.2.2"
++      },
++      "engines": {
++        "node": ">= 0.4"
++      },
++      "funding": {
++        "url": "https://github.com/sponsors/ljharb"
++      }
++    },
+     "node_modules/call-bind-apply-helpers": {
+       "version": "1.0.2",
+       "resolved": "https://registry.npmjs.org/call-bind-apply-helpers/-/call-bind-apply-helpers-1.0.2.tgz",
+@@ -3330,6 +3320,23 @@
+         "node": ">= 0.4"
+       }
+     },
++    "node_modules/call-bound": {
++      "version": "1.0.4",
++      "resolved": "https://registry.npmjs.org/call-bound/-/call-bound-1.0.4.tgz",
++      "integrity": "sha512-+ys997U96po4Kx/ABpBCqhA9EuxJaQWDQg7295H4hBphv3IZg0boBKuwYpt4YXp6MZ5AmZQnU/tyMTlRpaSejg==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "call-bind-apply-helpers": "^1.0.2",
++        "get-intrinsic": "^1.3.0"
++      },
++      "engines": {
++        "node": ">= 0.4"
++      },
++      "funding": {
++        "url": "https://github.com/sponsors/ljharb"
++      }
++    },
+     "node_modules/ccount": {
+       "version": "2.0.1",
+       "resolved": "https://registry.npmjs.org/ccount/-/ccount-2.0.1.tgz",
+@@ -3683,7 +3690,6 @@
+       "integrity": "sha512-rBMvIzlpA8v6E+SJZoo++HAYqsLrkg7MSfIinMPFhmkorw7X+dOXVJQs+QT69zGkzMyfDnIMN2Wid1+NbL3T+A==",
+       "dev": true,
+       "license": "MIT",
+-      "optional": true,
+       "dependencies": {
+         "es-define-property": "^1.0.0",
+         "es-errors": "^1.3.0",
+@@ -4395,6 +4401,29 @@
+         "node": ">=10"
+       }
+     },
++    "node_modules/fill-range": {
++      "version": "7.1.1",
++      "resolved": "https://registry.npmjs.org/fill-range/-/fill-range-7.1.1.tgz",
++      "integrity": "sha512-YsGpe3WHLK8ZYi4tWDg2Jy3ebRz2rXowDxnld4bkQB00cc/1Zw9AWnC0i9ztDJitivtQvaI9KaLyKrc+hBW0yg==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "to-regex-range": "^5.0.1"
++      },
++      "engines": {
++        "node": ">=8"
++      }
++    },
++    "node_modules/find-yarn-workspace-root": {
++      "version": "2.0.0",
++      "resolved": "https://registry.npmjs.org/find-yarn-workspace-root/-/find-yarn-workspace-root-2.0.0.tgz",
++      "integrity": "sha512-1IMnbjt4KzsQfnhnzNd8wUEgXZ44IzZaZmnLYx7D5FZlaHt2gW20Cri8Q+E/t5tIj4+epTBub+2Zxu/vNILzqQ==",
++      "dev": true,
++      "license": "Apache-2.0",
++      "dependencies": {
++        "micromatch": "^4.0.2"
++      }
++    },
+     "node_modules/form-data": {
+       "version": "4.0.6",
+       "resolved": "https://registry.npmjs.org/form-data/-/form-data-4.0.6.tgz",
+@@ -4708,7 +4737,6 @@
+       "integrity": "sha512-55JNKuIW+vq4Ke1BjOTjM2YctQIvCT7GFzHwmfZPGo5wnrgkid0YQtnAleFSqumZm4az3n2BS+erby5ipJdgrg==",
+       "dev": true,
+       "license": "MIT",
+-      "optional": true,
+       "dependencies": {
+         "es-define-property": "^1.0.0"
+       },
+@@ -5071,6 +5099,22 @@
+         "url": "https://github.com/sponsors/wooorm"
+       }
+     },
++    "node_modules/is-docker": {
++      "version": "2.2.1",
++      "resolved": "https://registry.npmjs.org/is-docker/-/is-docker-2.2.1.tgz",
++      "integrity": "sha512-F+i2BKsFrH66iaUFc0woD8sLy8getkwTwtOBjvs56Cx4CgJDeKQeqfz8wAYiSb8JOprWhHH5p77PbmYCvvUuXQ==",
++      "dev": true,
++      "license": "MIT",
++      "bin": {
++        "is-docker": "cli.js"
++      },
++      "engines": {
++        "node": ">=8"
++      },
++      "funding": {
++        "url": "https://github.com/sponsors/sindresorhus"
++      }
++    },
+     "node_modules/is-fullwidth-code-point": {
+       "version": "3.0.0",
+       "resolved": "https://registry.npmjs.org/is-fullwidth-code-point/-/is-fullwidth-code-point-3.0.0.tgz",
+@@ -5091,6 +5135,16 @@
+         "url": "https://github.com/sponsors/wooorm"
+       }
+     },
++    "node_modules/is-number": {
++      "version": "7.0.0",
++      "resolved": "https://registry.npmjs.org/is-number/-/is-number-7.0.0.tgz",
++      "integrity": "sha512-41Cifkg6e8TylSpdtTpeLVMqvSBEVzTttHvERD741+pnZ8ANv0004MRL43QKPDlK9cGvNp6NZWZUBlbGXYxxng==",
++      "dev": true,
++      "license": "MIT",
++      "engines": {
++        "node": ">=0.12.0"
++      }
++    },
+     "node_modules/is-plain-obj": {
+       "version": "4.1.0",
+       "resolved": "https://registry.npmjs.org/is-plain-obj/-/is-plain-obj-4.1.0.tgz",
+@@ -5103,6 +5157,19 @@
+         "url": "https://github.com/sponsors/sindresorhus"
+       }
+     },
++    "node_modules/is-wsl": {
++      "version": "2.2.0",
++      "resolved": "https://registry.npmjs.org/is-wsl/-/is-wsl-2.2.0.tgz",
++      "integrity": "sha512-fKzAra0rGJUUBwGBgNkHZuToZcn+TtXHpeCgmkMJMMYx1sQDYaCSyjJBSCa2nH1DGm7s3n1oBnohoVTBaN7Lww==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "is-docker": "^2.0.0"
++      },
++      "engines": {
++        "node": ">=8"
++      }
++    },
+     "node_modules/isarray": {
+       "version": "1.0.0",
+       "resolved": "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz",
+@@ -5198,6 +5265,33 @@
+       "dev": true,
+       "license": "MIT"
+     },
++    "node_modules/json-stable-stringify": {
++      "version": "1.3.0",
++      "resolved": "https://registry.npmjs.org/json-stable-stringify/-/json-stable-stringify-1.3.0.tgz",
++      "integrity": "sha512-qtYiSSFlwot9XHtF9bD9c7rwKjr+RecWT//ZnPvSmEjpV5mmPOCN4j8UjY5hbjNkOwZ/jQv3J6R1/pL7RwgMsg==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "call-bind": "^1.0.8",
++        "call-bound": "^1.0.4",
++        "isarray": "^2.0.5",
++        "jsonify": "^0.0.1",
++        "object-keys": "^1.1.1"
++      },
++      "engines": {
++        "node": ">= 0.4"
++      },
++      "funding": {
++        "url": "https://github.com/sponsors/ljharb"
++      }
++    },
++    "node_modules/json-stable-stringify/node_modules/isarray": {
++      "version": "2.0.5",
++      "resolved": "https://registry.npmjs.org/isarray/-/isarray-2.0.5.tgz",
++      "integrity": "sha512-xHjhDr3cNBK0BzdUJSPXZntQUx/mwMS5Rw4A7lPJ90XGAO6ISP/ePDNuo0vhqOZU+UD5JoodwCAAoZQd3FeAKw==",
++      "dev": true,
++      "license": "MIT"
++    },
+     "node_modules/json-stringify-safe": {
+       "version": "5.0.1",
+       "resolved": "https://registry.npmjs.org/json-stringify-safe/-/json-stringify-safe-5.0.1.tgz",
+@@ -5232,6 +5326,16 @@
+         "graceful-fs": "^4.1.6"
+       }
+     },
++    "node_modules/jsonify": {
++      "version": "0.0.1",
++      "resolved": "https://registry.npmjs.org/jsonify/-/jsonify-0.0.1.tgz",
++      "integrity": "sha512-2/Ki0GcmuqSrgFyelQq9M05y7PS0mEwuIzrf3f1fPqkVDVRvZrPZtVSMHxdgo8Aq0sxAOb/cr2aqqA3LeWHVPg==",
++      "dev": true,
++      "license": "Public Domain",
++      "funding": {
++        "url": "https://github.com/sponsors/ljharb"
++      }
++    },
+     "node_modules/keyv": {
+       "version": "4.5.4",
+       "resolved": "https://registry.npmjs.org/keyv/-/keyv-4.5.4.tgz",
+@@ -5242,6 +5346,16 @@
+         "json-buffer": "3.0.1"
+       }
+     },
++    "node_modules/klaw-sync": {
++      "version": "6.0.0",
++      "resolved": "https://registry.npmjs.org/klaw-sync/-/klaw-sync-6.0.0.tgz",
++      "integrity": "sha512-nIeuVSzdCCs6TDPTqI8w1Yre34sSq7AkZ4B3sfOBbI2CgVSB4Du4aLQijFU2+lhAFCwt9+42Hel6lQNIv6AntQ==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "graceful-fs": "^4.1.11"
++      }
++    },
+     "node_modules/lazy-val": {
+       "version": "1.0.5",
+       "resolved": "https://registry.npmjs.org/lazy-val/-/lazy-val-1.0.5.tgz",
+@@ -6506,6 +6620,33 @@
+       ],
+       "license": "MIT"
+     },
++    "node_modules/micromatch": {
++      "version": "4.0.8",
++      "resolved": "https://registry.npmjs.org/micromatch/-/micromatch-4.0.8.tgz",
++      "integrity": "sha512-PXwfBhYu0hBCPw8Dn0E+WDYb7af3dSLVWKi3HGv84IdF4TyFoC0ysxFd0Goxw7nSv4T/PzEJQxsYsEiFCKo2BA==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "braces": "^3.0.3",
++        "picomatch": "^2.3.1"
++      },
++      "engines": {
++        "node": ">=8.6"
++      }
++    },
++    "node_modules/micromatch/node_modules/picomatch": {
++      "version": "2.3.2",
++      "resolved": "https://registry.npmjs.org/picomatch/-/picomatch-2.3.2.tgz",
++      "integrity": "sha512-V7+vQEJ06Z+c5tSye8S+nHUfI51xoXIXjHQ99cQtKUkQqqO1kO/KCJUfZXuB47h/YBlDhah2H3hdUGXn8ie0oA==",
++      "dev": true,
++      "license": "MIT",
++      "engines": {
++        "node": ">=8.6"
++      },
++      "funding": {
++        "url": "https://github.com/sponsors/jonschlinkert"
++      }
++    },
+     "node_modules/mime": {
+       "version": "2.6.0",
+       "resolved": "https://registry.npmjs.org/mime/-/mime-2.6.0.tgz",
+@@ -6813,7 +6954,6 @@
+       "integrity": "sha512-NuAESUOUMrlIXOfHKzD6bpPu3tYt3xvjNdRIQ+FeT0lNb4K8WR70CaDxhuNguS2XG+GjkyMwOzsN5ZktImfhLA==",
+       "dev": true,
+       "license": "MIT",
+-      "optional": true,
+       "engines": {
+         "node": ">= 0.4"
+       }
+@@ -6859,6 +6999,23 @@
+         "regex-recursion": "^6.0.2"
+       }
+     },
++    "node_modules/open": {
++      "version": "7.4.2",
++      "resolved": "https://registry.npmjs.org/open/-/open-7.4.2.tgz",
++      "integrity": "sha512-MVHddDVweXZF3awtlAS+6pgKLlm/JgxZ90+/NBurBoQctVOOB/zDdVjcyPzQ+0laDGbsWgrRkflI65sQeOgT9Q==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "is-docker": "^2.0.0",
++        "is-wsl": "^2.1.1"
++      },
++      "engines": {
++        "node": ">=8"
++      },
++      "funding": {
++        "url": "https://github.com/sponsors/sindresorhus"
++      }
++    },
+     "node_modules/p-cancelable": {
+       "version": "2.1.1",
+       "resolved": "https://registry.npmjs.org/p-cancelable/-/p-cancelable-2.1.1.tgz",
+@@ -6922,6 +7079,52 @@
+         "url": "https://github.com/inikulin/parse5?sponsor=1"
+       }
+     },
++    "node_modules/patch-package": {
++      "version": "8.0.1",
++      "resolved": "https://registry.npmjs.org/patch-package/-/patch-package-8.0.1.tgz",
++      "integrity": "sha512-VsKRIA8f5uqHQ7NGhwIna6Bx6D9s/1iXlA1hthBVBEbkq+t4kXD0HHt+rJhf/Z+Ci0F/HCB2hvn0qLdLG+Qxlw==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "@yarnpkg/lockfile": "^1.1.0",
++        "chalk": "^4.1.2",
++        "ci-info": "^3.7.0",
++        "cross-spawn": "^7.0.3",
++        "find-yarn-workspace-root": "^2.0.0",
++        "fs-extra": "^10.0.0",
++        "json-stable-stringify": "^1.0.2",
++        "klaw-sync": "^6.0.0",
++        "minimist": "^1.2.6",
++        "open": "^7.4.2",
++        "semver": "^7.5.3",
++        "slash": "^2.0.0",
++        "tmp": "^0.2.4",
++        "yaml": "^2.2.2"
++      },
++      "bin": {
++        "patch-package": "index.js"
++      },
++      "engines": {
++        "node": ">=14",
++        "npm": ">5"
++      }
++    },
++    "node_modules/patch-package/node_modules/ci-info": {
++      "version": "3.9.0",
++      "resolved": "https://registry.npmjs.org/ci-info/-/ci-info-3.9.0.tgz",
++      "integrity": "sha512-NIxF55hv4nSqQswkAeiOi1r83xy8JldOFDTWiug55KBu9Jnblncd2U6ViHmYgHf01TPZS77NJBhBMKdWj9HQMQ==",
++      "dev": true,
++      "funding": [
++        {
++          "type": "github",
++          "url": "https://github.com/sponsors/sibiraj-s"
++        }
++      ],
++      "license": "MIT",
++      "engines": {
++        "node": ">=8"
++      }
++    },
+     "node_modules/path-is-absolute": {
+       "version": "1.0.1",
+       "resolved": "https://registry.npmjs.org/path-is-absolute/-/path-is-absolute-1.0.1.tgz",
+@@ -7690,6 +7893,24 @@
+         "url": "https://github.com/sponsors/sindresorhus"
+       }
+     },
++    "node_modules/set-function-length": {
++      "version": "1.2.2",
++      "resolved": "https://registry.npmjs.org/set-function-length/-/set-function-length-1.2.2.tgz",
++      "integrity": "sha512-pgRc4hJ4/sNjWCSS9AmnS40x3bNMDTknHgL5UaMBTMyJnU90EgWh1Rz+MC9eFu4BuN/UwZjKQuY/1v3rM7HMfg==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "define-data-property": "^1.1.4",
++        "es-errors": "^1.3.0",
++        "function-bind": "^1.1.2",
++        "get-intrinsic": "^1.2.4",
++        "gopd": "^1.0.1",
++        "has-property-descriptors": "^1.0.2"
++      },
++      "engines": {
++        "node": ">= 0.4"
++      }
++    },
+     "node_modules/shebang-command": {
+       "version": "2.0.0",
+       "resolved": "https://registry.npmjs.org/shebang-command/-/shebang-command-2.0.0.tgz",
+@@ -7752,6 +7973,16 @@
+         "node": ">=10"
+       }
+     },
++    "node_modules/slash": {
++      "version": "2.0.0",
++      "resolved": "https://registry.npmjs.org/slash/-/slash-2.0.0.tgz",
++      "integrity": "sha512-ZYKh3Wh2z1PpEXWr0MpSBZ0V6mZHAQfYevttO11c51CaWjGTaadiKZ+wVt1PbMlDV5qhMFslpZCemhwOK7C89A==",
++      "dev": true,
++      "license": "MIT",
++      "engines": {
++        "node": ">=6"
++      }
++    },
+     "node_modules/sonner": {
+       "version": "2.0.8",
+       "resolved": "https://registry.npmjs.org/sonner/-/sonner-2.0.8.tgz",
+@@ -8125,6 +8356,19 @@
+         "tmp": "^0.2.0"
+       }
+     },
++    "node_modules/to-regex-range": {
++      "version": "5.0.1",
++      "resolved": "https://registry.npmjs.org/to-regex-range/-/to-regex-range-5.0.1.tgz",
++      "integrity": "sha512-65P7iz6X5yEr1cwcgvQxbbIw7Uk3gOy5dIdtZ4rDveLqhrdJP+Li/Hx6tyK0NEb+2GCyneCMJiGqrADCSNk8sQ==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "is-number": "^7.0.0"
++      },
++      "engines": {
++        "node": ">=8.0"
++      }
++    },
+     "node_modules/trim-lines": {
+       "version": "3.0.1",
+       "resolved": "https://registry.npmjs.org/trim-lines/-/trim-lines-3.0.1.tgz",
+@@ -9006,6 +9250,28 @@
+       "dev": true,
+       "license": "ISC"
+     },
++    "node_modules/ws": {
++      "version": "8.22.1",
++      "resolved": "https://registry.npmjs.org/ws/-/ws-8.22.1.tgz",
++      "integrity": "sha512-oyL6OPYme/CmiFvNuGzeoxCJ4nOrZE2O1FwM9MWM1AsGri6nLXB2pg+lNA8aLeXMSav0J6eIVS1j6vUPzUtK9g==",
++      "dev": true,
++      "license": "MIT",
++      "engines": {
++        "node": ">=10.0.0"
++      },
++      "peerDependencies": {
++        "bufferutil": "^4.0.1",
++        "utf-8-validate": ">=5.0.2"
++      },
++      "peerDependenciesMeta": {
++        "bufferutil": {
++          "optional": true
++        },
++        "utf-8-validate": {
++          "optional": true
++        }
++      }
++    },
+     "node_modules/xmlbuilder": {
+       "version": "15.1.1",
+       "resolved": "https://registry.npmjs.org/xmlbuilder/-/xmlbuilder-15.1.1.tgz",
+@@ -9033,6 +9299,22 @@
+       "dev": true,
+       "license": "ISC"
+     },
++    "node_modules/yaml": {
++      "version": "2.9.1",
++      "resolved": "https://registry.npmjs.org/yaml/-/yaml-2.9.1.tgz",
++      "integrity": "sha512-3NxN8+78OdzbT7C/WjGsyfPAtJaN3FNDsWxv7Y7mcDsT/oOmgW8BpyQQFFBnvZE3j9Y2Sdz1ULFLezL7Eb2yFw==",
++      "dev": true,
++      "license": "ISC",
++      "bin": {
++        "yaml": "bin.mjs"
++      },
++      "engines": {
++        "node": ">= 14.6"
++      },
++      "funding": {
++        "url": "https://github.com/sponsors/eemeli"
++      }
++    },
+     "node_modules/yargs": {
+       "version": "17.7.3",
+       "resolved": "https://registry.npmjs.org/yargs/-/yargs-17.7.3.tgz",
+diff --git a/package.json b/package.json
+index 123bc37..8cd69bf 100644
+--- a/package.json
++++ b/package.json
+@@ -16,7 +16,8 @@
+     "desktop:dev": "node desktop/scripts/dev.ts",
+     "desktop:build": "npm run build && node desktop/scripts/build.ts",
+     "desktop:dist": "npm run desktop:build && node desktop/scripts/dist.ts",
+-    "desktop:icons": "node desktop/scripts/icons.ts"
++    "desktop:icons": "node desktop/scripts/icons.ts",
++    "postinstall": "patch-package"
+   },
+   "dependencies": {
+     "@fontsource-variable/inter": "^5.3.0",
+@@ -51,10 +52,12 @@
+     "electron-builder": "26.15.3",
+     "electron-updater": "6.8.9",
+     "esbuild": "0.28.2",
++    "patch-package": "^8.0.1",
+     "tailwindcss": "^4.3.3",
+     "typescript": "^7.0.2",
+     "vite": "^8.3.4",
+-    "vitest": "^5.0.4"
++    "vitest": "^5.0.4",
++    "ws": "^8.22.1"
+   },
+   "build": {
+     "appId": "com.umbrel.murmur",
+diff --git a/patches/@novnc+novnc+1.7.0.patch b/patches/@novnc+novnc+1.7.0.patch
+new file mode 100644
+index 0000000..15d55aa
+--- /dev/null
++++ b/patches/@novnc+novnc+1.7.0.patch
+@@ -0,0 +1,183 @@
++diff --git a/node_modules/@novnc/novnc/core/util/browser.js b/node_modules/@novnc/novnc/core/util/browser.js
++index 63596d2..35ddaa4 100644
++--- a/node_modules/@novnc/novnc/core/util/browser.js
+++++ b/node_modules/@novnc/novnc/core/util/browser.js
++@@ -74,81 +74,108 @@ export const hasScrollbarGutter = _hasScrollbarGutter;
++ export let supportsWebCodecsH264Decode = false;
++
++ async function _checkWebCodecsH264DecodeSupport() {
++-    if (!('VideoDecoder' in window)) {
++-        return false;
+++    // A platform decoder probe may never settle. H.264 is optional: fall
+++    // back to the other RFB encodings instead of blocking module evaluation.
+++    let decoder;
+++    let timer;
+++    let timedOut = false;
+++    async function probe() {
+++        if (!('VideoDecoder' in window)) {
+++            return false;
+++        }
+++
+++        // We'll need to make do with some placeholders here
+++        const config = {
+++            codec: 'avc1.42401f',
+++            codedWidth: 1920,
+++            codedHeight: 1080,
+++            optimizeForLatency: true,
+++        };
+++
+++        let support = await VideoDecoder.isConfigSupported(config);
+++        if (timedOut || !support.supported) {
+++            return false;
+++        }
+++
+++        // Firefox incorrectly reports supports for H.264 under some
+++        // circumstances, so we need to actually test a real frame
+++        // https://bugzilla.mozilla.org/show_bug.cgi?id=1932392
+++
+++        const data = new Uint8Array(Base64.decode(
+++            'AAAAAWdCwBTZnpuAgICgAAADACAAAAZB4oVNAAAAAWjJYyyAAAABBgX//4Hc' +
+++            'Rem95tlIt5Ys2CDZI+7veDI2NCAtIGNvcmUgMTY0IHIzMTA4IDMxZTE5Zjkg' +
+++            'LSBILjI2NC9NUEVHLTQgQVZDIGNvZGVjIC0gQ29weWxlZnQgMjAwMy0yMDIz' +
+++            'IC0gaHR0cDovL3d3dy52aWRlb2xhbi5vcmcveDI2NC5odG1sIC0gb3B0aW9u' +
+++            'czogY2FiYWM9MCByZWY9NSBkZWJsb2NrPTE6MDowIGFuYWx5c2U9MHgxOjB4' +
+++            'MTExIG1lPWhleCBzdWJtZT04IHBzeT0xIHBzeV9yZD0xLjAwOjAuMDAgbWl4' +
+++            'ZWRfcmVmPTEgbWVfcmFuZ2U9MTYgY2hyb21hX21lPTEgdHJlbGxpcz0yIDh4' +
+++            'OGRjdD0wIGNxbT0wIGRlYWR6b25lPTIxLDExIGZhc3RfcHNraXA9MSBjaHJv' +
+++            'bWFfcXBfb2Zmc2V0PS0yIHRocmVhZHM9MSBsb29rYWhlYWRfdGhyZWFkcz0x' +
+++            'IHNsaWNlZF90aHJlYWRzPTAgbnI9MCBkZWNpbWF0ZT0xIGludGVybGFjZWQ9' +
+++            'MCBibHVyYXlfY29tcGF0PTAgY29uc3RyYWluZWRfaW50cmE9MCBiZnJhbWVz' +
+++            'PTAgd2VpZ2h0cD0wIGtleWludD1pbmZpbml0ZSBrZXlpbnRfbWluPTI1IHNj' +
+++            'ZW5lY3V0PTQwIGludHJhX3JlZnJlc2g9MCByY19sb29rYWhlYWQ9NTAgcmM9' +
+++            'YWJyIG1idHJlZT0xIGJpdHJhdGU9NDAwIHJhdGV0b2w9MS4wIHFjb21wPTAu' +
+++            'NjAgcXBtaW49MCBxcG1heD02OSBxcHN0ZXA9NCBpcF9yYXRpbz0xLjQwIGFx' +
+++            'PTE6MS4wMACAAAABZYiEBrxmKAAPVccAAS044AA5DRJMnkycJk4TPw=='));
+++
+++        let gotframe = false;
+++        let error = null;
+++
+++        decoder = new VideoDecoder({
+++            output: (frame) => { gotframe = true; frame.close(); },
+++            error: (e) => { error = e; },
+++        });
+++        let chunk = new EncodedVideoChunk({
+++            timestamp: 0,
+++            type: 'key',
+++            data: data,
+++        });
+++
+++        decoder.configure(config);
+++        decoder.decode(chunk);
+++        try {
+++            await decoder.flush();
+++        } catch (e) {
+++            // Firefox incorrectly throws an exception here
+++            // https://bugzilla.mozilla.org/show_bug.cgi?id=1932566
+++            error = e;
+++        }
+++
+++        // Firefox fails to deliver the error on Windows, so we need to
+++        // check if we got a frame instead
+++        // https://bugzilla.mozilla.org/show_bug.cgi?id=1932579
+++        if (!gotframe) {
+++            return false;
+++        }
+++
+++        if (error !== null) {
+++            return false;
+++        }
+++
+++        return true;
++     }
++-
++-    // We'll need to make do with some placeholders here
++-    const config = {
++-        codec: 'avc1.42401f',
++-        codedWidth: 1920,
++-        codedHeight: 1080,
++-        optimizeForLatency: true,
++-    };
++-
++-    let support = await VideoDecoder.isConfigSupported(config);
++-    if (!support.supported) {
++-        return false;
++-    }
++-
++-    // Firefox incorrectly reports supports for H.264 under some
++-    // circumstances, so we need to actually test a real frame
++-    // https://bugzilla.mozilla.org/show_bug.cgi?id=1932392
++-
++-    const data = new Uint8Array(Base64.decode(
++-        'AAAAAWdCwBTZnpuAgICgAAADACAAAAZB4oVNAAAAAWjJYyyAAAABBgX//4Hc' +
++-        'Rem95tlIt5Ys2CDZI+7veDI2NCAtIGNvcmUgMTY0IHIzMTA4IDMxZTE5Zjkg' +
++-        'LSBILjI2NC9NUEVHLTQgQVZDIGNvZGVjIC0gQ29weWxlZnQgMjAwMy0yMDIz' +
++-        'IC0gaHR0cDovL3d3dy52aWRlb2xhbi5vcmcveDI2NC5odG1sIC0gb3B0aW9u' +
++-        'czogY2FiYWM9MCByZWY9NSBkZWJsb2NrPTE6MDowIGFuYWx5c2U9MHgxOjB4' +
++-        'MTExIG1lPWhleCBzdWJtZT04IHBzeT0xIHBzeV9yZD0xLjAwOjAuMDAgbWl4' +
++-        'ZWRfcmVmPTEgbWVfcmFuZ2U9MTYgY2hyb21hX21lPTEgdHJlbGxpcz0yIDh4' +
++-        'OGRjdD0wIGNxbT0wIGRlYWR6b25lPTIxLDExIGZhc3RfcHNraXA9MSBjaHJv' +
++-        'bWFfcXBfb2Zmc2V0PS0yIHRocmVhZHM9MSBsb29rYWhlYWRfdGhyZWFkcz0x' +
++-        'IHNsaWNlZF90aHJlYWRzPTAgbnI9MCBkZWNpbWF0ZT0xIGludGVybGFjZWQ9' +
++-        'MCBibHVyYXlfY29tcGF0PTAgY29uc3RyYWluZWRfaW50cmE9MCBiZnJhbWVz' +
++-        'PTAgd2VpZ2h0cD0wIGtleWludD1pbmZpbml0ZSBrZXlpbnRfbWluPTI1IHNj' +
++-        'ZW5lY3V0PTQwIGludHJhX3JlZnJlc2g9MCByY19sb29rYWhlYWQ9NTAgcmM9' +
++-        'YWJyIG1idHJlZT0xIGJpdHJhdGU9NDAwIHJhdGV0b2w9MS4wIHFjb21wPTAu' +
++-        'NjAgcXBtaW49MCBxcG1heD02OSBxcHN0ZXA9NCBpcF9yYXRpbz0xLjQwIGFx' +
++-        'PTE6MS4wMACAAAABZYiEBrxmKAAPVccAAS044AA5DRJMnkycJk4TPw=='));
++-
++-    let gotframe = false;
++-    let error = null;
++-
++-    let decoder = new VideoDecoder({
++-        output: (frame) => { gotframe = true; frame.close(); },
++-        error: (e) => { error = e; },
++-    });
++-    let chunk = new EncodedVideoChunk({
++-        timestamp: 0,
++-        type: 'key',
++-        data: data,
++-    });
++-
++-    decoder.configure(config);
++-    decoder.decode(chunk);
++     try {
++-        await decoder.flush();
++-    } catch (e) {
++-        // Firefox incorrectly throws an exception here
++-        // https://bugzilla.mozilla.org/show_bug.cgi?id=1932566
++-        error = e;
++-    }
++-
++-    // Firefox fails to deliver the error on Windows, so we need to
++-    // check if we got a frame instead
++-    // https://bugzilla.mozilla.org/show_bug.cgi?id=1932579
++-    if (!gotframe) {
++-        return false;
++-    }
++-
++-    if (error !== null) {
+++        return await Promise.race([
+++            probe(),
+++            new Promise(resolve => {
+++                timer = setTimeout(() => {
+++                    timedOut = true;
+++                    resolve(false);
+++                }, 2000);
+++            }),
+++        ]);
+++    } catch {
++         return false;
+++    } finally {
+++        clearTimeout(timer);
+++        // Release the test decoder after success, failure, or timeout.
+++        if (decoder) {
+++            try { decoder.close(); } catch { /* Already closed by the codec. */ }
+++        }
++     }
++-
++-    return true;
++ }
+++
++ supportsWebCodecsH264Decode = await _checkWebCodecsH264DecodeSupport();
++
++ /*
+diff --git a/src/features/screen/live-view.tsx b/src/features/screen/live-view.tsx
+index 25e635a..a65aa92 100644
+--- a/src/features/screen/live-view.tsx
++++ b/src/features/screen/live-view.tsx
+@@ -1,6 +1,7 @@
+ import './screen.css'
+ import { forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
+-import RFB from '@novnc/novnc'
++import type RFB from '@novnc/novnc'
++import { loadRfb } from './load-rfb'
+ import { cn } from '@/lib/cn'
+ import { useFinePointer } from '@/lib/use-media'
+ import { CHROME, PAGE, handBack, sizeOf, takeOver, useControl, useScreen, watch } from '@/state/screen'
+@@ -57,7 +58,7 @@ const holding = new Map<string, { rfb: RFB; size: Size }>()
+
+ const shapedLike = (rfb: RFB, size: Size) => rfb._fbWidth === size.w && rfb._fbHeight === size.h
+ const reshape = (rfb: RFB, size: Size) =>
+-  RFB.messages.setDesktopSize(rfb._sock, size.w, size.h, rfb._screenID, rfb._screenFlags)
++  (rfb.constructor as typeof RFB).messages.setDesktopSize(rfb._sock, size.w, size.h, rfb._screenID, rfb._screenFlags)
+
+ /**
+  * Hands the agent its browser back, the way it had it: a phone in control
+@@ -131,6 +132,7 @@ export const LiveView = forwardRef<
+   const stage = useRef<HTMLDivElement>(null)
+   const typing = useRef<HTMLInputElement>(null)
+   const [box, setBox] = useState<Size>({ w: 0, h: 0 })
++  const [loadError, setLoadError] = useState<string | null>(null)
+   const [rfb, setRfb] = useState<RFB | null>(null)
+   const [fb, setFb] = useState<Size | null>(null)
+   const yoursNow = useRef(yours)
+@@ -147,6 +149,7 @@ export const LiveView = forwardRef<
+   // One connection while the screen is on, made again whenever it drops.
+   useEffect(() => {
+     if (!running) return
++    setLoadError(null)
+     let alive = true
+     let current: RFB | undefined
+     let timer: ReturnType<typeof setTimeout> | undefined
+@@ -155,6 +158,15 @@ export const LiveView = forwardRef<
+       if (alive) timer = setTimeout(connect, Math.min(8000, 500 * 2 ** attempt++))
+     }
+     const connect = async () => {
++      let Client: typeof RFB
++      try {
++        Client = await loadRfb()
++      } catch {
++        if (alive) setLoadError('The live browser viewer could not start. You can still use chat.')
++        return
++      }
++      if (!alive) return
++      setLoadError(null)
+       let url: string
+       try {
+         url = await watch(profile)
+@@ -162,7 +174,7 @@ export const LiveView = forwardRef<
+         return again()
+       }
+       if (!alive || !stage.current) return
+-      const r = new RFB(stage.current, url, { shared: true })
++      const r = new Client(stage.current, url, { shared: true })
+       current = r
+       r.scaleViewport = true
+       r.resizeSession = false
+@@ -308,6 +320,7 @@ export const LiveView = forwardRef<
+           <div className="absolute inset-0 animate-fade">
+             {still && <Still src={still} size={agentSize} className="h-full w-full" />}
+             {screen && !running && off}
++            {loadError && <p role="alert" className="p-4 text-footnote text-ink-2">{loadError}</p>}
+           </div>
+         )}
+       </div>
+diff --git a/src/features/screen/load-rfb.test.ts b/src/features/screen/load-rfb.test.ts
+new file mode 100644
+index 0000000..041bcfe
+--- /dev/null
++++ b/src/features/screen/load-rfb.test.ts
+@@ -0,0 +1,25 @@
++import { afterEach, expect, it, vi } from 'vitest'
++import type RFB from '@novnc/novnc'
++import { loadRfb } from './load-rfb'
++
++afterEach(() => vi.useRealTimers())
++
++it('returns the viewer when its probe completes', async () => {
++  const Client = class {} as unknown as typeof RFB
++  await expect(loadRfb(async () => ({ default: Client }))).resolves.toBe(Client)
++})
++
++it('bounds a decoder probe that never settles', async () => {
++  vi.useFakeTimers()
++  const pending = loadRfb(() => new Promise(() => {}))
++  const rejected = expect(pending).rejects.toThrow('timed out')
++  await vi.advanceTimersByTimeAsync(5000)
++  await rejected
++  expect(vi.getTimerCount()).toBe(0)
++})
++
++it('clears the deadline when loading fails', async () => {
++  vi.useFakeTimers()
++  await expect(loadRfb(async () => { throw new Error('load failed') })).rejects.toThrow('load failed')
++  expect(vi.getTimerCount()).toBe(0)
++})
+diff --git a/src/features/screen/load-rfb.ts b/src/features/screen/load-rfb.ts
+new file mode 100644
+index 0000000..80bdb94
+--- /dev/null
++++ b/src/features/screen/load-rfb.ts
+@@ -0,0 +1,21 @@
++import type RFB from '@novnc/novnc'
++
++// noVNC awaits a WebCodecs probe while its module loads. Some Android devices
++// never finish that probe: keep it out of app startup, and bound the viewer wait.
++export async function loadRfb(
++  load: () => Promise<{ default: typeof RFB }> = () => import('@novnc/novnc'),
++  timeoutMs = 5000,
++): Promise<typeof RFB> {
++  let timer: ReturnType<typeof setTimeout> | undefined
++  try {
++    const module = await Promise.race([
++      load(),
++      new Promise<never>((_, reject) => {
++        timer = setTimeout(() => reject(new Error('Live viewer initialization timed out')), timeoutMs)
++      }),
++    ])
++    return module.default
++  } finally {
++    clearTimeout(timer)
++  }
++}
+diff --git a/test/decoder-browser.mjs b/test/decoder-browser.mjs
+new file mode 100644
+index 0000000..a1665a8
+--- /dev/null
++++ b/test/decoder-browser.mjs
+@@ -0,0 +1,101 @@
++// npm run build, then CHROMIUM_PATH=/usr/bin/chromium node test/decoder-browser.mjs
++// Uses a disposable browser and an in-memory RFB server; no Hermes or NAS writes.
++import { chromium, devices } from '@playwright/test'
++import { readFile } from 'node:fs/promises'
++import { resolve, extname } from 'node:path'
++import assert from 'node:assert/strict'
++import { WebSocketServer } from 'ws'
++
++const root = resolve(import.meta.dirname, '..')
++const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH, args: ['--no-sandbox'] })
++const mime = { '.js': 'text/javascript', '.css': 'text/css', '.html': 'text/html', '.svg': 'image/svg+xml' }
++try {
++  for (const stuck of ['config', 'flush', 'supported', 'rejected']) {
++    const context = await browser.newContext({ ...devices['Pixel 7'] })
++    await context.grantPermissions(['local-network-access'])
++    const page = await context.newPage()
++    page.on('console', m => { if(m.type() === 'error') console.log(m.text()) })
++    await page.addInitScript((stuck) => {
++      window.probes = 0
++      window.decoderClosed = false
++      window.VideoDecoder = class {
++        static isConfigSupported() {
++          window.probes++
++          if (stuck === 'rejected') return Promise.reject(new Error('Decoder unavailable'))
++          return stuck === 'config' ? new Promise(() => {}) : Promise.resolve({ supported: true })
++        }
++        constructor({ output }) { this.output = output }
++        configure() {}
++        decode() { if (stuck === 'supported') this.output({ close() {} }) }
++        flush() { return stuck === 'supported' ? Promise.resolve() : new Promise(() => {}) }
++        close() { window.decoderClosed = true }
++      }
++      window.EncodedVideoChunk = class {}
++    }, stuck)
++    await page.route('https://127.0.0.1/**', async route => {
++      const path = new URL(route.request().url()).pathname
++      if (path === '/murmur/session') return route.fulfill({ json: { required: true, signedIn: false } })
++      if (path === '/viewer-test') return route.fulfill({ contentType: 'text/html', body: '<div id="screen" style="width:200px;height:200px"></div>' })
++      const file = path.startsWith('/novnc/')
++        ? resolve(root, 'node_modules/@novnc/novnc', path.slice('/novnc/'.length))
++        : resolve(root, 'dist', path === '/' ? 'index.html' : path.slice(1))
++      try { await route.fulfill({ body: await readFile(file), contentType: mime[extname(file)] ?? 'application/octet-stream' }) }
++      catch { await route.fulfill({ status: 404 }) }
++    })
++    await page.goto('https://127.0.0.1/')
++    await page.getByRole('button', { name: 'Continue', exact: true }).waitFor({ timeout: 5000 })
++    assert.equal(await page.evaluate(() => window.probes), 0, 'startup must not import noVNC')
++
++    let encodings
++    const server = new WebSocketServer({ host: '127.0.0.1', port: 0 })
++    await new Promise(resolve => server.once('listening', resolve))
++    server.on('connection', ws => {
++      let phase = 0
++      ws.send(Buffer.from('RFB 003.008\n'))
++      ws.on('message', message => {
++        const b = Buffer.from(message)
++        if (phase === 0) { phase++; return ws.send(Buffer.from([1, 1])) }
++        if (phase === 1) { phase++; return ws.send(Buffer.alloc(4)) }
++        if (phase === 2) {
++          phase++
++          const init = Buffer.alloc(28)
++          init.writeUInt16BE(2, 0); init.writeUInt16BE(2, 2)
++          init[4] = 32; init[5] = 24; init[7] = 1
++          init.writeUInt16BE(255, 8); init.writeUInt16BE(255, 10); init.writeUInt16BE(255, 12)
++          init[14] = 16; init[15] = 8; init[16] = 0
++          init.writeUInt32BE(4, 20); init.write('test', 24)
++          return ws.send(init)
++        }
++        if (b[0] === 2) {
++          encodings = Array.from({ length: b.readUInt16BE(2) }, (_, i) => b.readInt32BE(4 + i * 4))
++        }
++        if (b[0] === 3) {
++          const update = Buffer.alloc(32)
++          update.writeUInt16BE(1, 2)
++          update.writeUInt16BE(2, 8); update.writeUInt16BE(2, 10)
++          for (let i = 16; i < 32; i += 4) update[i] = 255
++          ws.send(update)
++        }
++      })
++    })
++    await page.goto('https://127.0.0.1/viewer-test')
++    const supported = await page.evaluate(async (port) => {
++      const { default: RFB } = await import('/novnc/core/rfb.js')
++      const { supportsWebCodecsH264Decode } = await import('/novnc/core/util/browser.js')
++      window.rfb = new RFB(document.querySelector('#screen'), `ws://127.0.0.1:${port}`)
++      return supportsWebCodecsH264Decode
++    }, server.address().port)
++    assert.equal(supported, stuck === 'supported')
++    await page.waitForFunction(() => {
++      const c = document.querySelector('canvas')
++      return c && c.width === 2 && c.getContext('2d').getImageData(0, 0, 1, 1).data[0] === 255
++    }, null, { timeout: 5000 })
++    assert(encodings.includes(0), 'raw encoding remains available')
++    assert.equal(encodings.includes(50), stuck === 'supported', 'advertise H.264 only after a successful probe')
++    if (stuck === 'flush' || stuck === 'supported') assert.equal(await page.evaluate(() => window.decoderClosed), true)
++    console.log(`PASS ${stuck}: sign-in loads; capability negotiation matches probe; RFB connects and renders raw pixels`)
++    await context.close()
++    for (const client of server.clients) client.terminate()
++    await new Promise(resolve => server.close(resolve))
++  }
++} finally { await browser.close() }

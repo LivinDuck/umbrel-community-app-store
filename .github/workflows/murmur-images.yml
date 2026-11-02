@@ -1,0 +1,59 @@
+name: Build patched Murmur image
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - sources/murmur/**
+      - .github/workflows/murmur-images.yml
+permissions:
+  contents: read
+  packages: write
+concurrency:
+  group: murmur-image-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Prepare pinned upstream with maintained patch
+        run: python3 sources/murmur/prepare.py "$RUNNER_TEMP/murmur-source"
+      - name: Validate patched frontend and decoder fallback
+        working-directory: ${{ runner.temp }}/murmur-source
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm run postinstall
+          npx vitest run src/features/screen/load-rfb.test.ts
+          npm run build
+          npx playwright install --with-deps chromium
+          node test/decoder-browser.mjs
+      - name: Read immutable build inputs
+        id: inputs
+        run: |
+          echo "version=$(node -p 'require("./sources/murmur/upstream.json").packageVersion')" >> "$GITHUB_OUTPUT"
+          echo "base=$(node -p 'require("./sources/murmur/upstream.json").image')" >> "$GITHUB_OUTPUT"
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        id: build
+        with:
+          context: ${{ runner.temp }}/murmur-source
+          file: sources/murmur/Dockerfile
+          build-args: UPSTREAM_IMAGE=${{ steps.inputs.outputs.base }}
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ghcr.io/livinduck/murmur-web:${{ steps.inputs.outputs.version }}-${{ github.sha }}
+          cache-from: type=gha,scope=murmur-web
+          cache-to: type=gha,mode=max,scope=murmur-web
+      - name: Record immutable image
+        env:
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: echo "ghcr.io/livinduck/murmur-web@$DIGEST" >> "$GITHUB_STEP_SUMMARY"
