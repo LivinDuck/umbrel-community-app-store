@@ -1,6 +1,6 @@
 # Murmur Web
 
-Murmur **0.11.1** (package **0.11.1**), using the official upstream multi-architecture image, with only
+Murmur **0.11.1** (package **0.11.1-patch.1**), using a custom multi-architecture image layered over the pinned upstream image, with only
 the web service and Umbrel login proxy. No bundled Hermes container is installed.
 
 ## Fresh installation
@@ -60,7 +60,7 @@ The package linter checks Compose wiring, public image availability, and AMD64 /
 ARM64 support. The Murmur-specific CI test runs the pinned image on both
 architectures with a disposable Hermes API fixture. It checks the web UI,
 absence of built-in Hermes, server selection, token and password authentication,
-removal of the old fixed connection on update, saved-connection upgrades from 0.5.1, 0.7.0, 0.7.1, 0.8.0, 0.9.0 and 0.11.0,
+removal of the old fixed connection on update, saved-connection upgrades from 0.5.1, 0.7.0, 0.7.1, 0.8.0, 0.9.0, 0.11.0 and 0.11.1,
 cross-origin rejection, writable settings and persistence across restart and
 container recreation. The fixture is not a full Hermes Agent installation.
 
@@ -77,3 +77,18 @@ committed as `icon.svg`. Keep this artwork across upstream updates; see
 [maintenance instructions](AGENTS.md). The upstream container's browser/PWA
 icons are separate. The upstream MIT notice is retained in `UPSTREAM-LICENSE`
 for the underlying artwork.
+
+## Android HTTPS decoder fix
+
+Package 0.11.1-patch.1 includes a frontend-only patch for noVNC H.264 detection
+that can hang on affected Android Chrome devices. The live viewer is loaded on
+request, and a stalled decoder probe times out after two seconds and falls back
+to other RFB encodings. Successful H.264 detection remains enabled.
+
+The automated updater checks every latest stable release for an upstream fix.
+Until upstream passes the regression tests, it updates the base and reapplies
+this patch. See [image build and maintenance](../sources/murmur/README.md).
+
+Decoder regressions exercise the built sign-in page with a mobile Chrome profile,
+then an actual noVNC connection to a disposable VNC fixture that renders raw
+pixels after a simulated decoder hang. This is not an on-device Android test.

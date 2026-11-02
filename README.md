@@ -20,7 +20,7 @@ the app. Install it when you are ready.
 | DiscoPanel | 2.0.15 | [Setup and limitations](livinduck-discopanel/README.md) |
 | ClipSync | 1.0.2 | [Pairing and dedicated-port HTTPS setup](livinduck-clipsync/README.md) |
 | Shelfarr | 2026.10.05.1 | [Setup and library folders](livinduck-shelfarr/README.md) |
-| Murmur Web | 0.11.1 | [Connect to the existing Hermes Agent app](livinduck-murmur-web/README.md) |
+| Murmur Web | 0.11.1-patch.1 | [Connect to the existing Hermes Agent app](livinduck-murmur-web/README.md) |
 
 ## Packaging workflow
 
@@ -33,7 +33,7 @@ Send the upstream GitHub URL and any required integrations. For each app:
 5. Document validation limits and publish. NAS installation is a separate action.
 
 Updates repeat the same review, including data migrations and backup/recovery.
-No automatic installation or upstream version bumping is configured.
+Scheduled Murmur maintenance publishes validated store updates; installation remains manual.
 
 The `Validate apps` workflow uses a pinned revision of Umbrel's package linter
 with the official catalog available for dependency and port-conflict checks,

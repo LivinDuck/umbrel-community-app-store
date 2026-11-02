@@ -4,7 +4,7 @@ storage:
   dataRoot: data
 category: ai
 name: Murmur Web
-version: "0.11.1"
+version: "0.11.1-patch.1"
 tagline: A web interface for your existing Hermes agents
 description: >-
   Murmur's web interface without a bundled Hermes instance. Requires the separate
@@ -26,20 +26,17 @@ description: >-
   Murmur app's bundled Hermes. Additional remote Hermes servers can be added in
   Settings. Saved connections and their credentials can be edited there.
 releaseNotes: >-
-  Updates Murmur to 0.11.1. Agent browsers appear automatically in chat and show
-  the site loading while they open. Pinned models remain visible in their
-  service's full model list.
+  Fixes a blank screen on affected Android Chrome devices over HTTPS. Murmur
+  no longer waits for the live browser viewer's video-decoder check at startup.
 
 
-  Fixes menu placement and accidental selection of the first menu item when
-  touching and holding on phones.
+  If H.264 detection hangs or fails, the viewer falls back to other supported
+  encodings instead of hanging. Working H.264 decoding remains available.
 
 
-  Preserves web-only operation, editable external Hermes connections, saved
-  settings and the custom Samsung dark icon. No bundled Hermes is installed.
-
-
-  Full release notes: https://github.com/getumbrel/murmur/releases/tag/v0.11.1
+  Based on Murmur 0.11.1 with a maintained frontend compatibility patch.
+  Preserves web-only operation, external Hermes connections, saved settings
+  and the custom Samsung dark icon. No Hermes container is bundled.
 developer: Umbrel
 website: https://github.com/getumbrel/murmur
 dependencies:
