@@ -1,6 +1,6 @@
 # Murmur Web
 
-Murmur **0.9.0** (package **0.9.0**), using the official upstream multi-architecture image, with only
+Murmur **0.11.0** (package **0.11.0**), using the official upstream multi-architecture image, with only
 the web service and Umbrel login proxy. No bundled Hermes container is installed.
 
 ## Fresh installation
@@ -32,11 +32,16 @@ may require a newer Hermes Agent version; update that separate app as needed.
 
 ## Features that depend on Hermes
 
-Email in Murmur 0.9.0 requires the `murmur-mail` plugin, bundled in Umbrel's
-Hermes image `v0.22.5-1`. If your separate Hermes Agent lacks it, Murmur does
-not offer email. Update Hermes Agent separately when needed; this package
-never supplies or updates it. Apps connected through Nous Research require
-consent in Murmur before connecting.
+Email requires the `murmur-mail` plugin in your separate Hermes Agent. Murmur
+now offers to install that plugin through its email setup when it is missing;
+that is a user action in Murmur, not part of this package update. Apps connected
+through Nous Research require consent in Murmur before connecting.
+
+Voice calls require HTTPS and compatible voice support configured in Hermes.
+Live browser and virtual machine views likewise depend on the connected agent's
+capabilities. This package does not add GPU access or bundle a voice service.
+Routines and messaging need Hermes's gateway running; Murmur can ask Hermes to
+start it, or show instructions when the connected container cannot do so.
 
 ## Data and updates
 
@@ -55,7 +60,7 @@ The package linter checks Compose wiring, public image availability, and AMD64 /
 ARM64 support. The Murmur-specific CI test runs the pinned image on both
 architectures with a disposable Hermes API fixture. It checks the web UI,
 absence of built-in Hermes, server selection, token and password authentication,
-removal of the old fixed connection on update, saved-connection upgrades from 0.5.1, 0.7.0, 0.7.1 and 0.8.0,
+removal of the old fixed connection on update, saved-connection upgrades from 0.5.1, 0.7.0, 0.7.1, 0.8.0 and 0.9.0,
 cross-origin rejection, writable settings and persistence across restart and
 container recreation. The fixture is not a full Hermes Agent installation.
 
@@ -63,7 +68,7 @@ Real Umbrel installation, its login proxy, live agent chat and browser interacti
 are not covered by that disposable test. No NAS installation is performed when
 publishing this package.
 
-Upstream documentation: https://github.com/getumbrel/murmur/blob/v0.9.0/docs/STANDALONE.md
+Upstream documentation: https://github.com/getumbrel/murmur/blob/v0.11.0/docs/STANDALONE.md
 
 ## Custom icon
 

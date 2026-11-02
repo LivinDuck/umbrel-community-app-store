@@ -184,7 +184,7 @@ def main(auth, upgrade=False):
             assert int(mode) == 0o600
 
             previous_push_key = None
-            if upgrade and ':v0.8.0@' in upgrade:
+            if upgrade and any(version in upgrade for version in (':v0.8.0@', ':v0.9.0@')):
                 previous_push_key = json.loads(request('/murmur/notifications')[1])['key']
 
             if upgrade:
@@ -199,6 +199,10 @@ def main(auth, upgrade=False):
                 setup = json.loads(request('/murmur/setup')[1])
                 assert setup['decided'] and setup['builtin'] is None
                 assert request('/hermes/api/sessions')[0] == 200
+
+            # Provider credentials must not be revealed through the authenticated proxy.
+            assert request('/hermes/api/env/reveal', {'key': 'OPENAI_API_KEY'})[0] == 403
+            assert request('/hermes/api/env/reveal', {})[0] == 403
 
             # 0.8.0 stores push keys in the existing /data mount, without a subscription
             # or external push request. Registration must still reject cross-origin writes.
@@ -249,6 +253,7 @@ if __name__ == '__main__':
         'ghcr.io/getumbrel/murmur:v0.7.0@sha256:803766f5ed8514c7d13d3c5a714d2ab7ac6a9c52d4d986ea53bf802ef458ce4d',
         'ghcr.io/getumbrel/murmur:v0.7.1@sha256:9f108714aa42d8880ff6b1eabd5ed7359d67fab37577d251b07f6f4cca084406',
         'ghcr.io/getumbrel/murmur:v0.8.0@sha256:9c35e0fd6da1b979038e9a4684047bea9a9599af2c13e9696c92143447898475',
+        'ghcr.io/getumbrel/murmur:v0.9.0@sha256:4137c76a7636c3bd7fd963bf8a98d5a302fba728e0fac0de14681124f6a875a4',
     ):
         for auth in ('token', 'password'):
             main(auth, upgrade=upgrade)
