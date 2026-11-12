@@ -1,6 +1,6 @@
 # Murmur Web
 
-Murmur **0.11.1** (package **0.11.1-patch.1**), using a custom multi-architecture image layered over the pinned upstream image, with only
+Murmur **0.13.0** (package **0.13.0-patch.1**), using a custom multi-architecture image layered over the pinned upstream image, with only
 the web service and Umbrel login proxy. No bundled Hermes container is installed.
 
 ## Fresh installation
@@ -13,7 +13,9 @@ The launch port is **39406**. Umbrel supplies the shared Docker network and logi
 proxy. The local Hermes Agent is suggested at `http://hermes-agent_web_1:18789`.
 The package does not fix `HERMES_URL` or supply Hermes credentials. Murmur's
 onboarding lets you select the server and use its supported password sign-in.
-This does not imply support for arbitrary reverse-proxy or SSO authentication.
+Hermes OIDC single sign-on is also supported upstream; see its standalone guide
+for setup and the manual callback step on remote devices. Arbitrary proxy login
+pages are not a substitute for Hermes authentication.
 
 Manage server addresses and credentials in **Settings → Server**. Voice input
 needs HTTPS; ordinary chat can use Umbrel's local HTTP address.
@@ -60,7 +62,7 @@ The package linter checks Compose wiring, public image availability, and AMD64 /
 ARM64 support. The Murmur-specific CI test runs the pinned image on both
 architectures with a disposable Hermes API fixture. It checks the web UI,
 absence of built-in Hermes, server selection, token and password authentication,
-removal of the old fixed connection on update, saved-connection upgrades from 0.5.1, 0.7.0, 0.7.1, 0.8.0, 0.9.0, 0.11.0 and 0.11.1,
+removal of the old fixed connection on update, saved-connection upgrades from 0.5.1, 0.7.0, 0.7.1, 0.8.0, 0.9.0, 0.11.0, 0.11.1 and the previously shipped 0.11.1-patch.1 image,
 cross-origin rejection, writable settings and persistence across restart and
 container recreation. The fixture is not a full Hermes Agent installation.
 
@@ -68,7 +70,7 @@ Real Umbrel installation, its login proxy, live agent chat and browser interacti
 are not covered by that disposable test. No NAS installation is performed when
 publishing this package.
 
-Upstream documentation: https://github.com/getumbrel/murmur/blob/v0.11.1/docs/STANDALONE.md
+Upstream documentation: https://github.com/getumbrel/murmur/blob/v0.13.0/docs/STANDALONE.md
 
 ## Custom icon
 
@@ -80,7 +82,7 @@ for the underlying artwork.
 
 ## Android HTTPS decoder fix
 
-Package 0.11.1-patch.1 includes a frontend-only patch for noVNC H.264 detection
+Package 0.13.0-patch.1 includes a frontend-only patch for noVNC H.264 detection
 that can hang on affected Android Chrome devices. The live viewer is loaded on
 request, and a stalled decoder probe times out after two seconds and falls back
 to other RFB encodings. Successful H.264 detection remains enabled.

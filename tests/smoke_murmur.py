@@ -184,7 +184,7 @@ def main(auth, upgrade=False):
             assert int(mode) == 0o600
 
             previous_push_key = None
-            if upgrade and any(version in upgrade for version in (':v0.8.0@', ':v0.9.0@', ':v0.11.0@', ':v0.11.1@')):
+            if upgrade and any(version in upgrade for version in (':v0.8.0@', ':v0.9.0@', ':v0.11.0@', ':v0.11.1@', ':0.11.1-patch.1-')):
                 previous_push_key = json.loads(request('/murmur/notifications')[1])['key']
 
             if upgrade:
@@ -256,6 +256,7 @@ if __name__ == '__main__':
         'ghcr.io/getumbrel/murmur:v0.9.0@sha256:4137c76a7636c3bd7fd963bf8a98d5a302fba728e0fac0de14681124f6a875a4',
         'ghcr.io/getumbrel/murmur:v0.11.0@sha256:9997c671052d5679ea1ede56645e3574e926b5761b1ae3cf94380b96b20fac14',
         'ghcr.io/getumbrel/murmur:v0.11.1@sha256:0bbf9af2016f8e57856e6ebf729b6a0c8fb864bb5513dd555167f61edf5bd289',
+        'ghcr.io/livinduck/murmur-web:0.11.1-patch.1-e2730f581ab3875c6fe99b38c6de47c2c3793fa4@sha256:f058bb25bb06cfe64b23069b0ada04de2f079c591a6fdd35cdcf1e2248afbff5',
     ):
         for auth in ('token', 'password'):
             main(auth, upgrade=upgrade)
