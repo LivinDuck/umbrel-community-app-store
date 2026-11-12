@@ -1,6 +1,6 @@
 {
-  "version": "0.11.1",
-  "commit": "0e19f043e28549e30414be7c1dc1abaa83ba4b11",
-  "image": "ghcr.io/getumbrel/murmur:v0.11.1@sha256:0bbf9af2016f8e57856e6ebf729b6a0c8fb864bb5513dd555167f61edf5bd289",
-  "packageVersion": "0.11.1-patch.1"
+  "version": "0.13.0",
+  "commit": "28709db32bc56763ac3abf76b432ab4f52e2a795",
+  "image": "ghcr.io/getumbrel/murmur:v0.13.0@sha256:2163be06c9e355b33ce7bcb28e40e73b3a7a7cd1f7830b6ac92183b44d46db0c",
+  "packageVersion": "0.13.0-patch.1"
 }

@@ -5,7 +5,7 @@ index 1412832..2043b06 100644
 @@ -7,6 +7,7 @@
      "": {
        "name": "murmur",
-       "version": "0.11.1",
+       "version": "0.13.0",
 +      "hasInstallScript": true,
        "license": "MIT",
        "dependencies": {
@@ -795,12 +795,13 @@ diff --git a/src/features/screen/live-view.tsx b/src/features/screen/live-view.t
 index 25e635a..a65aa92 100644
 --- a/src/features/screen/live-view.tsx
 +++ b/src/features/screen/live-view.tsx
-@@ -1,6 +1,7 @@
+@@ -1,7 +1,8 @@
  import './screen.css'
  import { forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 -import RFB from '@novnc/novnc'
 +import type RFB from '@novnc/novnc'
 +import { loadRfb } from './load-rfb'
+ import { toast } from 'sonner'
  import { cn } from '@/lib/cn'
  import { useFinePointer } from '@/lib/use-media'
  import { CHROME, PAGE, handBack, sizeOf, takeOver, useControl, useScreen, watch } from '@/state/screen'
