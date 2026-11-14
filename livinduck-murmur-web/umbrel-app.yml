@@ -4,7 +4,7 @@ storage:
   dataRoot: data
 category: ai
 name: Murmur Web
-version: "0.13.0-patch.1"
+version: "0.15.0-patch.1"
 tagline: A web interface for your existing Hermes agents
 description: >-
   Murmur's web interface without a bundled Hermes instance. Requires the separate
@@ -26,10 +26,11 @@ description: >-
   Murmur app's bundled Hermes. Additional remote Hermes servers can be added in
   Settings. Saved connections and their credentials can be edited there.
 releaseNotes: >-
-  Updates Murmur to 0.13.0: search within chats, copy/share/download whole chats,
-  start multiple chats with the same group, and adjust text size. Agent chats
-  stay in the list when routines run. Includes improved browser preview,
-  clipboard paste, photo display and support for Hermes single sign-on.
+  Updates Murmur to 0.15.0. Agents from multiple saved servers now appear
+  together. Browser previews persist across reloads. Chats can retry a question
+  after a model limit resets, quote several passages, and wrap long code lines.
+  Fixes mobile edge-swipe navigation and includes upstream runtime security updates.
+  A per-chat option can disable approval prompts; other chats keep their settings.
 
 
   Retains the Android HTTPS decoder fix: stalled H.264 checks cannot block
@@ -38,7 +39,7 @@ releaseNotes: >-
   are preserved. No Hermes container is bundled or updated.
 
 
-  Upstream changes: https://github.com/getumbrel/murmur/releases/tag/v0.13.0
+  Upstream changes: https://github.com/getumbrel/murmur/releases/tag/v0.15.0
 developer: Umbrel
 website: https://github.com/getumbrel/murmur
 dependencies:

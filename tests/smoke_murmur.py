@@ -184,7 +184,7 @@ def main(auth, upgrade=False):
             assert int(mode) == 0o600
 
             previous_push_key = None
-            if upgrade and any(version in upgrade for version in (':v0.8.0@', ':v0.9.0@', ':v0.11.0@', ':v0.11.1@', ':0.11.1-patch.1-')):
+            if upgrade and any(version in upgrade for version in (':v0.8.0@', ':v0.9.0@', ':v0.11.0@', ':v0.11.1@', ':0.11.1-patch.1-', ':0.13.0-patch.1-')):
                 previous_push_key = json.loads(request('/murmur/notifications')[1])['key']
 
             if upgrade:
@@ -219,12 +219,32 @@ def main(auth, upgrade=False):
                 capture=True).stdout.strip()
             assert int(notification_mode) == 0o600
 
+            # New persisted browser previews stay private and survive recreation.
+            frame_path = '/murmur/browser-frames/existing-chat/fixture-step'
+            picture = bytes([255, 216, 255, 224]) + bytes(58) + bytes([255, 217])
+            def frame_request(method='GET', origin=None):
+                req = urllib.request.Request(base + frame_path, method=method,
+                    headers={'Origin': origin or base, 'Content-Type': 'image/jpeg'},
+                    data=picture if method == 'PUT' else None)
+                try:
+                    with urllib.request.urlopen(req, timeout=20) as response:
+                        return response.status, response.read()
+                except urllib.error.HTTPError as error:
+                    return error.code, error.read()
+            assert frame_request('PUT', 'https://untrusted.example')[0] == 403
+            assert frame_request('PUT')[0] == 200
+            assert frame_request() == (200, picture)
+            assert request('/murmur/ask-again', {}, origin='https://untrusted.example')[0] == 403
+            assert json.loads(request('/murmur/ask-again')[1]) == {'held': []}
+
             compose('restart', 'web')
             assert ready()['name'] == 'My existing Hermes'
             compose('up', '-d', '--force-recreate', '--wait', '--wait-timeout', '120', 'web')
             assert ready()['name'] == 'My existing Hermes'
             assert saved_settings() == settings
             assert json.loads(request('/murmur/notifications')[1])['key'] == notifications['key']
+
+            assert frame_request() == (200, picture)
 
             # Hermes restarts rotate its token. Murmur must recover without storing it.
             compose('restart', 'hermes-fixture')
@@ -257,6 +277,7 @@ if __name__ == '__main__':
         'ghcr.io/getumbrel/murmur:v0.11.0@sha256:9997c671052d5679ea1ede56645e3574e926b5761b1ae3cf94380b96b20fac14',
         'ghcr.io/getumbrel/murmur:v0.11.1@sha256:0bbf9af2016f8e57856e6ebf729b6a0c8fb864bb5513dd555167f61edf5bd289',
         'ghcr.io/livinduck/murmur-web:0.11.1-patch.1-e2730f581ab3875c6fe99b38c6de47c2c3793fa4@sha256:f058bb25bb06cfe64b23069b0ada04de2f079c591a6fdd35cdcf1e2248afbff5',
+        'ghcr.io/livinduck/murmur-web:0.13.0-patch.1-83ed9a8f71c47a14bd24285287a29fd6fed91370@sha256:6a5f3a7933e7a9cf45683462381bd35ef289e878f7b60eb0cd5a7d699c51ec82',
     ):
         for auth in ('token', 'password'):
             main(auth, upgrade=upgrade)
