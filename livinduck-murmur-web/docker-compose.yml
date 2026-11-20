@@ -9,7 +9,7 @@ services:
       PROXY_AUTH_WHITELIST: "/manifest.webmanifest,/favicon.svg,/icon.svg,/icon-192.png,/icon-512.png,/icon-maskable-512.png,/apple-touch-icon.png"
 
   web:
-    image: ghcr.io/livinduck/murmur-web:0.15.0-patch.1-d71341701e5cdfefc825fb0cda66cc5d1c08d1c9@sha256:f2477cba4a4c9028947a94266249c8754698474db7aac14f40eebf10a8ca3b22
+    image: ghcr.io/livinduck/murmur-web:0.15.2-patch.1-b75060ba8edab67796afddbbc40b0c33302b9d93@sha256:ca8e76809331b483d35c1a624db8b740653f2aa58642f553cea0d44db536acf5
     user: "1000:1000"
     init: true
     restart: on-failure

@@ -184,7 +184,7 @@ def main(auth, upgrade=False):
             assert int(mode) == 0o600
 
             previous_push_key = None
-            if upgrade and any(version in upgrade for version in (':v0.8.0@', ':v0.9.0@', ':v0.11.0@', ':v0.11.1@', ':0.11.1-patch.1-', ':0.13.0-patch.1-')):
+            if upgrade and any(version in upgrade for version in (':v0.8.0@', ':v0.9.0@', ':v0.11.0@', ':v0.11.1@', ':0.11.1-patch.1-', ':0.13.0-patch.1-', ':0.15.0-patch.1-')):
                 previous_push_key = json.loads(request('/murmur/notifications')[1])['key']
 
             if upgrade:
@@ -278,6 +278,7 @@ if __name__ == '__main__':
         'ghcr.io/getumbrel/murmur:v0.11.1@sha256:0bbf9af2016f8e57856e6ebf729b6a0c8fb864bb5513dd555167f61edf5bd289',
         'ghcr.io/livinduck/murmur-web:0.11.1-patch.1-e2730f581ab3875c6fe99b38c6de47c2c3793fa4@sha256:f058bb25bb06cfe64b23069b0ada04de2f079c591a6fdd35cdcf1e2248afbff5',
         'ghcr.io/livinduck/murmur-web:0.13.0-patch.1-83ed9a8f71c47a14bd24285287a29fd6fed91370@sha256:6a5f3a7933e7a9cf45683462381bd35ef289e878f7b60eb0cd5a7d699c51ec82',
+        'ghcr.io/livinduck/murmur-web:0.15.0-patch.1-d71341701e5cdfefc825fb0cda66cc5d1c08d1c9@sha256:f2477cba4a4c9028947a94266249c8754698474db7aac14f40eebf10a8ca3b22',
     ):
         for auth in ('token', 'password'):
             main(auth, upgrade=upgrade)

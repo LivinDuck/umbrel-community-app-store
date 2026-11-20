@@ -1,6 +1,6 @@
 # Murmur Web
 
-Murmur **0.15.0** (package **0.15.0-patch.1**), using a custom multi-architecture image layered over the pinned upstream image, with only
+Murmur **0.15.2** (package **0.15.2-patch.1**), using a custom multi-architecture image layered over the pinned upstream image, with only
 the web service and Umbrel login proxy. No bundled Hermes container is installed.
 
 ## Fresh installation
@@ -48,6 +48,10 @@ start it, or show instructions when the connected container cannot do so.
 
 ## Data and updates
 
+Murmur 0.15.2 includes fixes for routine templates, delivery and findings with
+Hermes 0.23.2 or newer. Routine notes now use agent metadata; older notes remain
+readable. This package does not update the separate Hermes Agent app.
+
 - Murmur settings persist in `data/murmur`, mounted at `/data`.
 - Saved browser previews use `browser-frames/` (capped at 100 MB); deferred
   questions use `ask-again.json` inside that same persisted directory.
@@ -65,7 +69,7 @@ The package linter checks Compose wiring, public image availability, and AMD64 /
 ARM64 support. The Murmur-specific CI test runs the pinned image on both
 architectures with a disposable Hermes API fixture. It checks the web UI,
 absence of built-in Hermes, server selection, token and password authentication,
-removal of the old fixed connection on update, saved-connection upgrades from 0.5.1, 0.7.0, 0.7.1, 0.8.0, 0.9.0, 0.11.0, 0.11.1 and the previously shipped 0.11.1-patch.1 and 0.13.0-patch.1 images,
+removal of the old fixed connection on update, saved-connection upgrades from 0.5.1, 0.7.0, 0.7.1, 0.8.0, 0.9.0, 0.11.0, 0.11.1 and the previously shipped 0.11.1-patch.1, 0.13.0-patch.1 and 0.15.0-patch.1 images,
 cross-origin rejection, writable settings and persistence across restart and
 container recreation. The fixture is not a full Hermes Agent installation.
 
@@ -73,7 +77,7 @@ Real Umbrel installation, its login proxy, live agent chat and browser interacti
 are not covered by that disposable test. No NAS installation is performed when
 publishing this package.
 
-Upstream documentation: https://github.com/getumbrel/murmur/blob/v0.15.0/docs/STANDALONE.md
+Upstream documentation: https://github.com/getumbrel/murmur/blob/v0.15.2/docs/STANDALONE.md
 
 ## Custom icon
 
@@ -85,7 +89,7 @@ for the underlying artwork.
 
 ## Android HTTPS decoder fix
 
-Package 0.15.0-patch.1 includes a frontend-only patch for noVNC H.264 detection
+Package 0.15.2-patch.1 includes a frontend-only patch for noVNC H.264 detection
 that can hang on affected Android Chrome devices. The live viewer is loaded on
 request, and a stalled decoder probe times out after two seconds and falls back
 to other RFB encodings. Successful H.264 detection remains enabled.
